@@ -1,4 +1,4 @@
-FROM python:3.10-slim-bookworm
+FROM python:3.9-slim-bullseye
 
 USER root
 # Install general dependencies
