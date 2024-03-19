@@ -19,28 +19,28 @@ services:
       SE_SCREEN_HEIGHT: '1080'
       SE_NODE_GRID_URL: 'false'
 
-  # telegram-bot:
-  #   image: lncrawl
-  #   build:
-  #     context: .
-  #     dockerfile: ./scripts/Dockerfile
-  #   restart: unless-stopped
-  #   command: python -m lncrawl --suppress --bot telegram
-  #   environment:
-  #     CLOUD_DRIVE: "GOFILE"
-  #     TELEGRAM_TOKEN: "${TELEGRAM_TOKEN}"
+   telegram-bot:
+     image: lncrawl
+     build:
+       context: .
+       dockerfile: ./scripts/Dockerfile
+     restart: unless-stopped
+     command: python -m lncrawl --suppress --bot telegram
+     environment:
+       CLOUD_DRIVE: "GOFILE"
+       TELEGRAM_TOKEN: "${TELEGRAM_TOKEN}"
 
-  discord-bot:
-    image: lncrawl
-    build:
-      context: .
-      dockerfile: ./scripts/Dockerfile
-    restart: unless-stopped
-    command: python -m lncrawl --suppress --bot discord --shard-id 0 --shard-count 1 --selenium-grid "http://chrome:4444"
-    depends_on:
-      - chrome
-    environment:
-      CLOUD_DRIVE: "GOFILE"
-      DISCORD_TOKEN: "${DISCORD_TOKEN}"
-      DISCORD_SIGNAL_CHAR: "${DISCORD_SIGNAL_CHAR}"
-      DISCORD_DISABLE_SEARCH: "${DISCORD_DISABLE_SEARCH}"
+  #discord-bot:
+  #  image: lncrawl
+  #  build:
+  #    context: .
+  #    dockerfile: ./scripts/Dockerfile
+  #  restart: unless-stopped
+  #  command: python -m lncrawl --suppress --bot discord --shard-id 0 --shard-count 1 --selenium-grid "http://chrome:4444"
+  #  depends_on:
+  #    - chrome
+  #  environment:
+  #    CLOUD_DRIVE: "GOFILE"
+  #    DISCORD_TOKEN: "${DISCORD_TOKEN}"
+  #    DISCORD_SIGNAL_CHAR: "${DISCORD_SIGNAL_CHAR}"
+  #    DISCORD_DISABLE_SEARCH: "${DISCORD_DISABLE_SEARCH}"
