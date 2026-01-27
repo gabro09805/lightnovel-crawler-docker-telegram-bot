@@ -59,6 +59,7 @@ export const MainLayoutSidebar: React.FC<{
             flex: 1,
             overflow: 'auto',
             borderRight: 'none',
+            userSelect: 'none',
           }}
         >
           <Menu.ItemGroup
