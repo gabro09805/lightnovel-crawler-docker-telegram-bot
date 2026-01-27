@@ -18,7 +18,7 @@ export const MainLayout: React.FC<any> = () => {
           overflow: 'auto',
           position: 'relative',
           padding: md ? 20 : 10,
-          paddingBottom: md ? 70 : 100,
+          paddingBottom: md ? 70 : 120,
         }}
       >
         {!md && (
