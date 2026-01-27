@@ -18,9 +18,7 @@ export const MobileNavbar: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
-    if (drawerOpen) {
-      setDrawerOpen(false);
-    }
+    setDrawerOpen(false);
   }, [currentPath]);
 
   const handleNavClick = (path: string) => {
@@ -40,6 +38,7 @@ export const MobileNavbar: React.FC = () => {
           right: 0,
           zIndex: 1000,
           padding: '0 5px',
+          userSelect: 'none',
           background: token.colorBgContainer,
           boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.06)',
           borderTop: `1px solid ${token.colorBorderSecondary}`,
