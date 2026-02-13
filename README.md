@@ -264,7 +264,39 @@ make setup && make install
 make start
 ```
 
-Run `make help` to see all available commands.
+### Makefile Help
+
+```
+Lightnovel Crawler Build System
+
+Setup & Install:
+  make setup        Create virtual environment
+  make install      Install all dependencies (Python + Web)
+  make install-py   Install Python dependencies only
+  make install-web  Install web dependencies only
+
+Development:
+  make start        Start both backend and frontend servers
+  make start-server Start backend server only
+  make start-web    Start frontend dev server only
+  make lint         Run all linters
+
+Build:
+  make build        Full build (web + wheel + exe)
+  make build-web    Build frontend only
+  make build-wheel  Build Python wheel only
+  make build-exe    Build PyInstaller executable
+
+Docker:
+  make docker-build Build Docker image
+  make docker-up    Start containers with docker compose
+  make docker-down  Stop containers
+  make docker-logs  View container logs
+
+Other:
+  make version      Show current version
+  make clean        Remove build artifacts and venvs
+```
 
 ### Adding new source
 
