@@ -21,8 +21,8 @@ endif
 VERSION := $(shell $(PYTHON) -c "print(open('lncrawl/VERSION').read().strip())")
 
 # Default target (help/info)
-.PHONY: clean version
-_: version
+.PHONY: all version clean setup install-py install-web install build-web build-wheel build-exe build start-server watch-server start-web start lint-py lint-web lint pull remove-tag push-tag push-tag-force docker-build docker-up docker-down docker-logs
+all: version
 
 version:
 	@echo Current version: $(VERSION)
