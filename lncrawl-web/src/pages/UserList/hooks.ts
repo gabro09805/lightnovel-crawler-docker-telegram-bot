@@ -25,7 +25,7 @@ export function useUserList() {
     [searchParams]
   );
 
-  const perPage = 25;
+  const perPage = 10;
   const currentPage = useMemo(
     () => parseInt(searchParams.get('page') || '1', 10),
     [searchParams]

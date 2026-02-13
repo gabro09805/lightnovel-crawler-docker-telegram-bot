@@ -28,7 +28,8 @@ function getClassName(currentPath: string, path: string): string | undefined {
 
 export const MainLayoutSidebar: React.FC<{
   fullWidth?: boolean;
-}> = ({ fullWidth }) => {
+  style?: React.CSSProperties;
+}> = ({ fullWidth, style }) => {
   const { token } = theme.useToken();
   const { pathname: currentPath } = useLocation();
   const isAdmin = useSelector(Auth.select.isAdmin);
@@ -39,6 +40,7 @@ export const MainLayoutSidebar: React.FC<{
       collapsible={false}
       width={fullWidth ? '100%' : 250}
       style={{
+        ...style,
         height: fullWidth ? '100%' : '100vh',
       }}
     >
