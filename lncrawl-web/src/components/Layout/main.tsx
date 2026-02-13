@@ -1,6 +1,6 @@
-import LncrawlImage from '@/assets/lncrawl.svg';
-import { Avatar, Divider, Grid, Layout, Typography } from 'antd';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Divider, Grid, Layout } from 'antd';
+import { Outlet } from 'react-router-dom';
+import { MobileLayoutHeader } from './_header';
 import { MobileNavbar } from './_navbar';
 import { MainLayoutSidebar } from './_sidebar';
 
@@ -15,29 +15,6 @@ const PageContainer: React.FC<any> = () => {
     >
       <Outlet />
     </div>
-  );
-};
-
-const MobileHeader: React.FC<any> = () => {
-  const navigate = useNavigate();
-  return (
-    <Typography.Title
-      onClick={() => navigate('/')}
-      level={4}
-      style={{
-        textAlign: 'center',
-        fontSize: 18,
-        margin: 0,
-      }}
-    >
-      <Avatar
-        shape="square"
-        src={LncrawlImage}
-        size={24}
-        style={{ paddingBottom: 3 }}
-      />
-      Lightnovel Crawler
-    </Typography.Title>
   );
 };
 
@@ -75,7 +52,7 @@ const MainLayoutMobile: React.FC<any> = () => {
           paddingBottom: 80,
         }}
       >
-        <MobileHeader />
+        <MobileLayoutHeader />
         <Divider size="small" />
         <PageContainer />
       </Layout.Content>

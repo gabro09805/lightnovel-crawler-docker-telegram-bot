@@ -47,7 +47,9 @@ const NavbarButton: React.FC<{
   );
 };
 
-export const MobileNavbar: React.FC = () => {
+export const MobileNavbar: React.FC<{
+  style?: React.CSSProperties;
+}> = ({ style }) => {
   const navigate = useNavigate();
   const { token } = theme.useToken();
   const { pathname: currentPath } = useLocation();
@@ -100,6 +102,7 @@ export const MobileNavbar: React.FC = () => {
         background: token.colorBgContainer,
         boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.06)',
         borderTop: `1px solid ${token.colorBorderSecondary}`,
+        ...style,
       }}
     >
       <NavbarButton
