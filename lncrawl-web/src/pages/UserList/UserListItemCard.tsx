@@ -6,25 +6,8 @@ import { type User } from '@/types';
 import { formatDate } from '@/utils/time';
 import { CalendarOutlined } from '@ant-design/icons';
 import { Card, Col, Flex, Grid, Row, Space, Typography } from 'antd';
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import md5 from 'spark-md5';
 import { UserActionButtons } from './UserActionButtons';
-
-const getGravatarProfile = async (email: string) => {
-  const hash = md5.hash(email.trim().toLowerCase());
-  const key = `__gravatar_${hash}`;
-  const cache = localStorage.getItem(key);
-  if (cache) {
-    return JSON.parse(cache);
-  }
-
-  const resp = await fetch(`https://en.gravatar.com/${hash}.json`);
-  const json = await resp.json();
-  const data = json.entry;
-  localStorage.setItem(key, JSON.stringify(data));
-  return data;
-};
 
 export const UserListItemCard: React.FC<{
   user: User;
@@ -33,18 +16,6 @@ export const UserListItemCard: React.FC<{
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }> = ({ user, hideActions, onChange, onClick }) => {
   const { lg } = Grid.useBreakpoint();
-
-  const [displayName, setDisplayName] = useState<string>();
-
-  useEffect(() => {
-    if (!user.name?.trim()) {
-      getGravatarProfile(user.email)
-        .then((p) => setDisplayName(p.displayName))
-        .catch(console.error);
-    } else {
-      setDisplayName(user.name.trim());
-    }
-  }, [user.name, user.email]);
 
   return (
     <Card
@@ -59,13 +30,13 @@ export const UserListItemCard: React.FC<{
         <Col flex="auto" style={{ width: '300px' }}>
           <Space size="middle" style={{ position: 'relative' }}>
             <UserAvatar size={48} user={user} />
-            {displayName ? (
+            {user.name ? (
               <Flex vertical>
                 <Typography.Text strong>
                   {hideActions ? (
-                    displayName
+                    user.name
                   ) : (
-                    <Link to={`/admin/user/${user.id}`}>{displayName}</Link>
+                    <Link to={`/admin/user/${user.id}`}>{user.name}</Link>
                   )}
                 </Typography.Text>
                 <Typography.Text

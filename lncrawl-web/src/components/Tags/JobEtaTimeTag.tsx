@@ -19,18 +19,20 @@ export const JobEtaTimeTag: React.FC<{ job: Job }> = ({ job }) => {
       done: job.done,
       total: job.total,
     };
-    setEntries((p) => {
-      if (p.length > 0) {
-        const last = p[p.length - 1];
-        if (last.total !== v.total) {
-          return [v];
+    queueMicrotask(() => {
+      setEntries((p) => {
+        if (p.length > 0) {
+          const last = p[p.length - 1];
+          if (last.total !== v.total) {
+            return [v];
+          }
+          if (last.done === v.done) {
+            last.time = Date.now();
+            return [...p];
+          }
         }
-        if (last.done === v.done) {
-          last.time = Date.now();
-          return [...p];
-        }
-      }
-      return [v, ...p.slice(0, 500)];
+        return [v, ...p.slice(0, 500)];
+      });
     });
   }, [job.done, job.total]);
 

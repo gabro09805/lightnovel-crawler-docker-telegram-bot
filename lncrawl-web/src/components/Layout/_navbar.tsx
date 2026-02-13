@@ -56,7 +56,7 @@ export const MobileNavbar: React.FC<{
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
-    setDrawerOpen(false);
+    queueMicrotask(() => setDrawerOpen(false));
   }, [currentPath]);
 
   const handleNavClick = (path: string) => {

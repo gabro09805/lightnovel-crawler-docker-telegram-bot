@@ -7,6 +7,7 @@ import type { Job } from '@/types';
 import { formatDate, formatDuration } from '@/utils/time';
 import { ClockCircleFilled, ClockCircleOutlined } from '@ant-design/icons';
 import { Card, Flex, Grid, Tag, Typography } from 'antd';
+import { useEffect, useState } from 'react';
 import { JobActionButtons } from './JobActionButtons';
 import { JobProgressLine } from '../JobList/JobProgessBar';
 import { JobErrorDetailsCard } from './JobErrorDetailsCard';
@@ -16,6 +17,13 @@ export const JobDetailsCard: React.FC<{
   hideActions?: boolean;
 }> = ({ job, hideActions }) => {
   const { lg } = Grid.useBreakpoint();
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!job.is_running || !job.started_at) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [job.is_running, job.started_at]);
 
   return (
     <Card variant="outlined">
@@ -48,9 +56,9 @@ export const JobDetailsCard: React.FC<{
             <b>Started:</b> {formatDate(job.started_at)}
           </Tag>
         )}
-        {!!job.is_running && (
+        {!!job.is_running && job.started_at && (
           <Tag icon={<ClockCircleOutlined spin />} color="default">
-            <b>Elapsed:</b> {formatDuration(Date.now() - job.started_at!)}
+            <b>Elapsed:</b> {formatDuration(now - job.started_at)}
           </Tag>
         )}
         <JobEtaTimeTag job={job} />
