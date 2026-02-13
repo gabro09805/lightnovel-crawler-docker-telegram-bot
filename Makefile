@@ -20,47 +20,9 @@ endif
 
 VERSION := $(shell $(PYTHON) -c "print(open('lncrawl/VERSION').read().strip())")
 
-# Phony targets
-.PHONY: help version clean setup install install-py install-web \
-        build build-web build-wheel build-exe \
-        start start-server watch-server start-web \
-        lint lint-py lint-web \
-        docker-build docker-up docker-down docker-logs \
-        pull push-tag remove-tag push-tag-force
-
-# Default target
-_: help
-
-help:
-	@echo "Lightnovel Crawler Build System"
-	@echo ""
-	@echo "Setup & Install:"
-	@echo "  make setup        Create virtual environment"
-	@echo "  make install      Install all dependencies (Python + Web)"
-	@echo "  make install-py   Install Python dependencies only"
-	@echo "  make install-web  Install web dependencies only"
-	@echo ""
-	@echo "Development:"
-	@echo "  make start        Start both backend and frontend servers"
-	@echo "  make start-server Start backend server only"
-	@echo "  make start-web    Start frontend dev server only"
-	@echo "  make lint         Run all linters"
-	@echo ""
-	@echo "Build:"
-	@echo "  make build        Full build (web + wheel + exe)"
-	@echo "  make build-web    Build frontend only"
-	@echo "  make build-wheel  Build Python wheel only"
-	@echo "  make build-exe    Build PyInstaller executable"
-	@echo ""
-	@echo "Docker:"
-	@echo "  make docker-build Build Docker image"
-	@echo "  make docker-up    Start containers with docker compose"
-	@echo "  make docker-down  Stop containers"
-	@echo "  make docker-logs  View container logs"
-	@echo ""
-	@echo "Other:"
-	@echo "  make version      Show current version"
-	@echo "  make clean        Remove build artifacts and venvs"
+# Default target (help/info)
+.PHONY: clean version
+_: version
 
 version:
 	@echo Current version: $(VERSION)
