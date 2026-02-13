@@ -1,8 +1,6 @@
-import { MainLayout } from '@/components/Layout';
-import { ReaderLayout } from '@/components/Layout/reader';
+import { AuthLayout, MainLayout, ReaderLayout } from '@/components/Layout';
 import { Navigate, type RouteObject } from 'react-router-dom';
 
-import { AuthLayout } from '@/components/Layout/auth';
 import { FeedbackDetailsPage } from './FeedbackDetails';
 import { FeedbackListPage } from './FeedbackList';
 import { ForgotPasswordPage } from './ForgotPassword';

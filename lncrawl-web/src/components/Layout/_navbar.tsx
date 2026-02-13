@@ -9,7 +9,7 @@ import {
 import { Button, Drawer, Flex, theme } from 'antd';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { MainLayoutSidebar } from './sidebar';
+import { MainLayoutSidebar } from './_sidebar';
 
 export const MobileNavbar: React.FC = () => {
   const navigate = useNavigate();
