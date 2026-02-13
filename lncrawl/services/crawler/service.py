@@ -114,6 +114,7 @@ class CrawlerService:
         chapter_id: str,
         signal=Event(),
         crawler: Optional[Crawler] = None,
+        refresh: bool = False,
     ) -> Chapter:
         chapter = ctx.chapters.get(chapter_id)
         url = HttpUrl(chapter.url)
@@ -130,7 +131,11 @@ class CrawlerService:
         crawler.scraper.signal = signal
 
         # check if download is necessary
-        if chapter.is_available and chapter.extra.get('crawler_version') == crawler_version:
+        if (
+            not refresh
+            and chapter.is_available
+            and chapter.extra.get('crawler_version') == crawler_version
+        ):
             return chapter
 
         # get chapter content
@@ -169,6 +174,7 @@ class CrawlerService:
         image_id: str,
         signal=Event(),
         crawler: Optional[Crawler] = None,
+        refresh: bool = False,
     ) -> ChapterImage:
         image = ctx.images.get(image_id)
         url = HttpUrl(image.url)
@@ -185,7 +191,11 @@ class CrawlerService:
         crawler.scraper.signal = signal
 
         # check if download is necessary
-        if image.is_available and image.extra.get('crawler_version') == crawler_version:
+        if (
+            not refresh
+            and image.is_available
+            and image.extra.get('crawler_version') == crawler_version
+        ):
             return image
 
         # download image

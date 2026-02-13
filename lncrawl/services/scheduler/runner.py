@@ -32,7 +32,7 @@ class JobRunner:
                 if not job:
                     job = ctx.jobs._pending(
                         artifact,
-                        skip_user_ids=_users,
+                        skip_user_ids=_users.values(),
                     )
                     return
                 if not job:
@@ -201,13 +201,13 @@ class JobRunner:
             return
 
         alert_items: Set[NotificationItem] = set()
-        all_notificcations = set(NotificationItem)
+        all_notifications = set(NotificationItem)
         email_alerts = self.user.extra.get('email_alerts') or {}
         email_sent = set(self.job.extra.get('email_sent') or [])
         for k, v in email_alerts.items():
             if not v or v in email_sent:
                 continue
-            if int(k) not in all_notificcations:
+            if int(k) not in all_notifications:
                 continue
             alert_items.add(NotificationItem(int(k)))
 
@@ -460,6 +460,7 @@ class JobRunner:
                 self.user.id,
                 chapter_id,
                 self.signal,
+                refresh=(not self.job.parent_job_id),
             )
             if not chapter.is_available:
                 return self.__set_done('Failed to fetch contents')
@@ -532,6 +533,7 @@ class JobRunner:
                 self.user.id,
                 image_id,
                 self.signal,
+                refresh=(not self.job.parent_job_id),
             )
             if not image.is_available:
                 return self.__set_done('Failed to download image')
