@@ -150,18 +150,16 @@ export const NovelReaderPage: React.FC<any> = () => {
   useEffect(() => {
     if (!data) return;
 
+    // reset scroll position
+    window.scrollTo(0, 0);
+
+    // reset speaking position
     store.dispatch(Reader.action.setSepakPosition(0));
+
+    // stop speaking if chapter is done
     if (data && !data.content && data.chapter.is_done) {
       store.dispatch(Reader.action.setSpeaking(false));
     }
-
-    const fid = requestAnimationFrame(() => {
-      const mainEl = document.querySelector('main');
-      if (mainEl) {
-        mainEl.scrollTop = 0;
-      }
-    });
-    return () => cancelAnimationFrame(fid);
   }, [data]);
 
   if (loading) {
