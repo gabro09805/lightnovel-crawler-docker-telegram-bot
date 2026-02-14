@@ -99,7 +99,7 @@ export const NovelDetailsCard: React.FC<{
             items={[
               {
                 label: 'Authors',
-                span: 2,
+                span: lg ? 2 : 1,
                 children: novel.authors,
               },
               {

@@ -17,7 +17,10 @@ export const ChapterDetailsCard: React.FC<{
       title={inner ? undefined : chapter.title}
       variant={inner ? 'borderless' : 'outlined'}
       styles={{
-        body: { padding: 0 },
+        body: {
+          padding: 10,
+          paddingTop: inner ? 0 : 5,
+        },
         title: {
           fontSize: 22,
           whiteSpace: 'wrap',
@@ -43,7 +46,7 @@ export const ChapterDetailsCard: React.FC<{
         items={[
           {
             label: 'URL',
-            span: 3,
+            span: lg ? 3 : 1,
             children: (
               <a href={chapter.url} target="_blank">
                 {chapter.url}

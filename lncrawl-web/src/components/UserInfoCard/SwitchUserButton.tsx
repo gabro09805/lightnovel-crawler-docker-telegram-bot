@@ -56,7 +56,7 @@ export const SwitchUserButton: React.FC<{
       >
         <List>
           {availableUsers.map((user) => (
-            <div style={{ position: 'relative' }}>
+            <div key={user.id} style={{ position: 'relative' }}>
               <UserListItemCard
                 user={user}
                 hideActions

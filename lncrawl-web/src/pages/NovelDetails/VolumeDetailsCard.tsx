@@ -85,7 +85,10 @@ export const VolumeDetailsCard: React.FC<{
       title={inner ? undefined : volume.title}
       variant={inner ? 'borderless' : undefined}
       styles={{
-        body: { padding: 0 },
+        body: {
+          padding: 10,
+          paddingTop: 5,
+        },
         title: {
           fontSize: 22,
           whiteSpace: 'wrap',

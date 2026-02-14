@@ -14,7 +14,7 @@ export const UserTierTag: React.FC<{ value?: UserTier }> = ({ value }) => {
       );
     case UserTier.VIP:
       return (
-        <Tag bordered color="volcano-inverse" icon={<CrownFilled />}>
+        <Tag variant="solid" color="volcano" icon={<CrownFilled />}>
           VIP
         </Tag>
       );

@@ -63,81 +63,88 @@ export const MainLayoutSidebar: React.FC<{
             borderRight: 'none',
             userSelect: 'none',
           }}
-        >
-          <Menu.ItemGroup
-            title={<UserInfoCard />}
-            style={{
-              background: 'none',
-              height: 'fit-content',
-            }}
-          />
-          <Menu.Divider />
-          <Menu.Item
-            icon={<DeploymentUnitOutlined />}
-            className={getClassName(currentPath, '/')}
-          >
-            <Link to="/">Requests</Link>
-          </Menu.Item>
-          <Menu.Item
-            icon={<BookOutlined />}
-            className={getClassName(currentPath, '/novels')}
-          >
-            <Link to="/novels">Novels</Link>
-          </Menu.Item>
-          <Menu.Item
-            icon={<FolderOpenOutlined />}
-            className={getClassName(currentPath, '/libraries')}
-          >
-            <Link to="/libraries">Libraries</Link>
-          </Menu.Item>
-          <Menu.Item
-            icon={<FileDoneOutlined />}
-            className={getClassName(currentPath, '/meta/sources')}
-          >
-            <Link to="/meta/sources">Crawlers</Link>
-          </Menu.Item>
-          <Menu.Item
-            icon={<CommentOutlined />}
-            className={getClassName(currentPath, '/feedbacks')}
-          >
-            <Link to="/feedbacks">Feedbacks</Link>
-          </Menu.Item>
-          <Menu.Divider />
-          <Menu.Item
-            icon={<UserOutlined />}
-            className={getClassName(currentPath, '/profile')}
-          >
-            <Link to="/profile">Profile</Link>
-          </Menu.Item>
-          <Menu.Item
-            icon={<SettingOutlined />}
-            className={getClassName(currentPath, '/settings')}
-          >
-            <Link to="/settings">Settings</Link>
-          </Menu.Item>
-          <Menu.Divider />
-          <Menu.Item
-            icon={<QuestionCircleOutlined />}
-            className={getClassName(currentPath, '/tutorial')}
-          >
-            <Link to="/tutorial">Tutorial</Link>
-          </Menu.Item>
-          {isAdmin && <Menu.Divider />}
-          {isAdmin && (
-            <Menu.SubMenu
-              key="admin"
-              title="Administration"
-              icon={<ControlOutlined />}
-            >
-              <Menu.Item
-                icon={<TeamOutlined />}
-                className={getClassName(currentPath, '/admin/users')}
-              >
-                <Link to="/admin/users">Users</Link>
-              </Menu.Item>
-            </Menu.SubMenu>
-          )}
-        </Menu>
+          items={[
+            {
+              type: 'group',
+              key: 'user',
+              label: <UserInfoCard />,
+              style: {
+                background: 'none',
+                height: 'fit-content',
+              },
+            },
+            { type: 'divider' },
+            {
+              key: '/',
+              icon: <DeploymentUnitOutlined />,
+              className: getClassName(currentPath, '/'),
+              label: <Link to="/">Requests</Link>,
+            },
+            {
+              key: '/novels',
+              icon: <BookOutlined />,
+              className: getClassName(currentPath, '/novels'),
+              label: <Link to="/novels">Novels</Link>,
+            },
+            {
+              key: '/libraries',
+              icon: <FolderOpenOutlined />,
+              className: getClassName(currentPath, '/libraries'),
+              label: <Link to="/libraries">Libraries</Link>,
+            },
+            {
+              key: '/meta/sources',
+              icon: <FileDoneOutlined />,
+              className: getClassName(currentPath, '/meta/sources'),
+              label: <Link to="/meta/sources">Crawlers</Link>,
+            },
+            {
+              key: '/feedbacks',
+              icon: <CommentOutlined />,
+              className: getClassName(currentPath, '/feedbacks'),
+              label: <Link to="/feedbacks">Feedbacks</Link>,
+            },
+            { type: 'divider' },
+            {
+              key: '/profile',
+              icon: <UserOutlined />,
+              className: getClassName(currentPath, '/profile'),
+              label: <Link to="/profile">Profile</Link>,
+            },
+            {
+              key: '/settings',
+              icon: <SettingOutlined />,
+              className: getClassName(currentPath, '/settings'),
+              label: <Link to="/settings">Settings</Link>,
+            },
+            { type: 'divider' },
+            {
+              key: '/tutorial',
+              icon: <QuestionCircleOutlined />,
+              className: getClassName(currentPath, '/tutorial'),
+              label: <Link to="/tutorial">Tutorial</Link>,
+            },
+            ...(isAdmin
+              ? [
+                  { type: 'divider' as const },
+                  {
+                    key: 'admin',
+                    type: 'submenu' as const,
+                    icon: <ControlOutlined />,
+                    label: 'Administration',
+                    children: [
+                      {
+                        key: '/admin/users',
+                        icon: <TeamOutlined />,
+                        className: getClassName(currentPath, '/admin/users'),
+                        label: <Link to="/admin/users">Users</Link>,
+                      },
+                    ],
+                  },
+                ]
+              : []),
+          ]}
+        />
 
         <Divider style={{ margin: 0 }} />
         <Flex

@@ -19,25 +19,25 @@ const steps: StepsProps['items'] = [
   {
     icon: <DeploymentUnitOutlined />,
     title: <Link to="/">Request Novel</Link>,
-    description: 'Start by requesting a novel from a supported source',
+    content: 'Start by requesting a novel from a supported source',
     style: { flex: 1 },
   },
   {
     icon: <BookOutlined />,
     title: <Link to="/novels">Browse Novels</Link>,
-    description: 'Browse the list of all collected novels',
+    content: 'Browse the list of all collected novels',
     style: { flex: 1 },
   },
   {
     icon: <FolderOpenOutlined />,
     title: <Link to="/libraries">Organize Libraries</Link>,
-    description: 'Create libraries to organize your novels',
+    content: 'Create libraries to organize your novels',
     style: { flex: 1 },
   },
   {
     icon: <ReadOutlined />,
     title: 'Read & Download',
-    description: 'Read novels online or download in various formats',
+    content: 'Read novels online or download in various formats',
     style: { flex: 1 },
   },
 ];

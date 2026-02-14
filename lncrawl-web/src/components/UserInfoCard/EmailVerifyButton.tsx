@@ -107,7 +107,6 @@ export const EmailVerifyButton: React.FC<any> = () => {
       <Modal
         centered
         open={showVerify}
-        maskClosable={false}
         title="Verify Email"
         okText="Verify"
         width={450}
@@ -115,6 +114,7 @@ export const EmailVerifyButton: React.FC<any> = () => {
         onCancel={() => setShowVerify(false)}
         cancelButtonProps={{ type: 'text' }}
         okButtonProps={{ loading, disabled: !otp || !token }}
+        mask={{ closable: false }}
       >
         <Flex vertical gap={15}>
           <Typography.Text>
@@ -137,7 +137,7 @@ export const EmailVerifyButton: React.FC<any> = () => {
             )}
           </Space>
 
-          {Boolean(error) && <Alert type="error" showIcon message={error} />}
+          {Boolean(error) && <Alert type="error" showIcon title={error} />}
         </Flex>
       </Modal>
     </>

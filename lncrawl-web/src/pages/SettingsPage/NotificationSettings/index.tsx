@@ -72,7 +72,7 @@ export const NotificationSettings: React.FC<any> = () => {
         <Alert
           showIcon
           type="warning"
-          message="Please verify your email first to get notifications."
+          title="Please verify your email first to get notifications."
         />
       )}
 

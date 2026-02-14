@@ -87,7 +87,8 @@ export const RequestNovelCard: React.FC<any> = () => {
             }}
             styles={{
               textarea: {
-                overflow: 'hidden',
+                overflowX: 'hidden',
+                overflowY: 'hidden',
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
               },

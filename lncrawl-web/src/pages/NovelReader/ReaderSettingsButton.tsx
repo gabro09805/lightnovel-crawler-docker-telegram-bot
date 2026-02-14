@@ -40,8 +40,8 @@ export const ReaderSettingsButton: React.FC<
           open={open}
           closable={false}
           placement="bottom"
+          size={300}
           onClose={() => setOpen(false)}
-          height={300}
           styles={{
             body: {
               padding: 5,

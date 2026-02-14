@@ -17,6 +17,7 @@ export const JobListItemCard: React.FC<{
   return (
     <Link to={`/job/${job.id}`}>
       <Card
+        hoverable
         style={{ marginBottom: 5 }}
         styles={{
           body: { padding: 15 },

@@ -55,23 +55,23 @@ export const MakeArtifactButton: React.FC<{
 
       <Modal
         width={400}
-        title={
-          <Typography.Title level={4} style={{ margin: 0 }}>
-            <AppstoreAddOutlined /> Make Artifact
-          </Typography.Title>
-        }
         open={open}
         destroyOnHidden
         loading={changing}
         okText="Create"
         onOk={handleMakeArtifact}
         onCancel={() => setOpen(false)}
+        title={
+          <Typography.Title level={4} style={{ margin: 0 }}>
+            <AppstoreAddOutlined /> Make Artifact
+          </Typography.Title>
+        }
       >
         <Row>
           {Object.entries(OutputFormat).map(([name, value]) => (
             <Col xs={12} key={name}>
               <Checkbox
-                value={selected[value]}
+                checked={selected[value]}
                 onClick={() => toggleSelected(value)}
                 style={{
                   width: '100%',
