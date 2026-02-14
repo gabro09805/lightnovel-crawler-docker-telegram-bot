@@ -9,6 +9,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.repository == 'lncrawl/lightnovel-crawler'
     runs-on: ubuntu-latest
 
     permissions:
@@ -17,14 +18,11 @@ jobs:
 
     env:
       REGISTRY: ghcr.io
+      IMAGE_NAME: ghcr.io/${{ github.repository }}
 
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
-
-      - name: 🔧 Set lowercase image name
-        run: |
-          echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
       - name: 🛡️ Setup SSH Key
         run: |
@@ -33,9 +31,6 @@ jobs:
           echo "${{ secrets.SSH_SECRET }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
-
-      - name: 🏗️ Set up QEMU
-        uses: docker/setup-qemu-action@v3
 
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

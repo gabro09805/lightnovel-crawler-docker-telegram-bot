@@ -19,13 +19,13 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
+        python-version:
+          ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
 
     steps:
       - uses: actions/checkout@v4
 
       - name: 🔐 Validate VERSION tag
-        if: github.repository == 'lncrawl/lightnovel-crawler'
         run: |
           [ "${GITHUB_REF##*/}" == "v$(head -n 1 lncrawl/VERSION)" ] || exit 100
 
@@ -90,7 +90,6 @@ jobs:
           retention-days: 7
 
       - name: 🚀 Release Artifact
-        if: github.repository == 'lncrawl/lightnovel-crawler'
         uses: ncipollo/release-action@v1
         with:
           artifacts: "dist/lncrawl.exe"
@@ -129,7 +128,6 @@ jobs:
           retention-days: 7
 
       - name: 🚀 Release Artifact
-        if: github.repository == 'lncrawl/lightnovel-crawler'
         uses: ncipollo/release-action@v1
         with:
           artifacts: "dist/lncrawl-mac"
@@ -171,7 +169,6 @@ jobs:
           retention-days: 7
 
       - name: 🚀 Release Artifacts
-        if: github.repository == 'lncrawl/lightnovel-crawler'
         uses: ncipollo/release-action@v1
         with:
           artifacts: "dist/lncrawl-linux,dist/*.whl"
@@ -180,13 +177,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🔗 Update Download Links
-        if: github.repository == 'lncrawl/lightnovel-crawler'
         env:
           SHLINK_API_KEY: ${{ secrets.SHLINK_API_KEY }}
         run: sh ./scripts/bitanon.sh
 
       - name: 📦 Publish to PyPI
-        if: github.repository == 'lncrawl/lightnovel-crawler'
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
@@ -206,6 +201,8 @@ jobs:
 
     env:
       REGISTRY: ghcr.io
+      IMAGE_NAME: ghcr.io/${{ github.repository }}
+      BASE_IMAGE: ghcr.io/${{ github.repository_owner }}/lncrawl-base:latest
 
     steps:
       - name: 📥 Checkout
