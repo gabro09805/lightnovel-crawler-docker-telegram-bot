@@ -10,5 +10,14 @@ export default defineConfig({
     outDir: '../lncrawl/server/web',
     assetsDir: 'assets',
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-antd': ['antd', '@ant-design/icons'],
+          'vendor-redux': ['@reduxjs/toolkit', 'react-redux', 'redux-persist'],
+        },
+      },
+    },
   },
 });

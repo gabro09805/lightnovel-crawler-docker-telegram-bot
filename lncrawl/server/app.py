@@ -59,4 +59,7 @@ async def serve_web(fallback: str):
     target_file = web_dir.joinpath(fallback)
     if target_file.is_file():
         return FileResponse(target_file)
-    return FileResponse(web_dir / "index.html")
+    return FileResponse(
+        web_dir / "index.html",
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+    )
