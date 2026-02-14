@@ -11,7 +11,7 @@ export const JobErrorDetailsCard: React.FC<{ job: Job }> = ({ job }) => {
   const isAdmin = useSelector(Auth.select.isAdmin);
 
   const html = useMemo(() => {
-    const lines = (job.error || '')
+    const lines = String(job.error)
       .split('\n')
       .filter(Boolean)
       .map((line) => line.replace(/^\s+/, '&nbsp;'));

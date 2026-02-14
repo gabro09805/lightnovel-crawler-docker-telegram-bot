@@ -12,13 +12,11 @@ export const ErrorState: React.FC<{
         title={title}
         subTitle={error || 'An error occurred while loading the data.'}
         extra={
-          onRetry
-            ? [
-                <Button key="retry" onClick={onRetry}>
-                  Retry
-                </Button>,
-              ]
-            : undefined
+          onRetry ? (
+            <Button key="retry" onClick={onRetry}>
+              Retry
+            </Button>
+          ) : undefined
         }
       />
     </Flex>

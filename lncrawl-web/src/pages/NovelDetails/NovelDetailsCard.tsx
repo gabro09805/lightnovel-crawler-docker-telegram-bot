@@ -60,7 +60,7 @@ export const NovelDetailsCard: React.FC<{
           </Typography.Text>
         </Flex>
       }
-      extra={[
+      extra={
         <Tooltip title={'Original source'}>
           <Typography.Link
             href={novel.url}
@@ -70,8 +70,8 @@ export const NovelDetailsCard: React.FC<{
           >
             <ExportOutlined />
           </Typography.Link>
-        </Tooltip>,
-      ]}
+        </Tooltip>
+      }
     >
       <Flex gap="20px" vertical={!lg}>
         <Flex vertical align="center" justify="flex-start" gap="5px">

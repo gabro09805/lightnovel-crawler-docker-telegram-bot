@@ -17,9 +17,9 @@ export const ArtifactListCard: React.FC<{
         body: { paddingTop: 5, paddingBottom: 5 },
       }}
       extra={
-        showMakeButton && novelId
-          ? [<MakeArtifactButton novelId={novelId} />]
-          : undefined
+        showMakeButton && novelId ? (
+          <MakeArtifactButton novelId={novelId} />
+        ) : undefined
       }
     >
       {artifacts && artifacts.length > 0 ? (

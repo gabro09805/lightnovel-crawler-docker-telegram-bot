@@ -187,7 +187,7 @@ export const NovelReaderPage: React.FC<any> = () => {
           status="404"
           title="Failed to load chapter content"
           subTitle={error}
-          extra={[
+          extra={
             <Button
               onClick={() => {
                 setLoading(true);
@@ -195,8 +195,8 @@ export const NovelReaderPage: React.FC<any> = () => {
               }}
             >
               Retry
-            </Button>,
-          ]}
+            </Button>
+          }
         />
       </Flex>
     );
