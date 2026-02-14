@@ -1,11 +1,10 @@
 import logging
-from typing import Any, List, Optional
+from typing import Any, Iterable, List, Optional, Type
 
 from bs4 import BeautifulSoup
 from requests.cookies import RequestsCookieJar
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.types import WaitExcTypes
 
 from ..webdriver import ChromeOptions, WebDriver, create_new
 from ..webdriver.elements import EC, By, WebElement
@@ -256,7 +255,7 @@ class Browser:
         by: By = By.CSS_SELECTOR,
         timeout: Optional[float] = 30,
         poll_frequency: Optional[float] = 0.25,
-        ignored_exceptions: Optional[WaitExcTypes] = None,
+        ignored_exceptions: Optional[Iterable[Type[Exception]]] = None,
         expected_conditon=EC.presence_of_element_located,
         reversed: bool = False,
     ):

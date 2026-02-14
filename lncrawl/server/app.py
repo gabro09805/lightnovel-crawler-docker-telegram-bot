@@ -50,7 +50,7 @@ app.add_middleware(
 app.include_router(api, prefix='/api')
 
 # Mount static files
-app.mount("/static", CustomStaticFiles(), name="static",)
+app.mount("/static", CustomStaticFiles(), name="static")
 
 
 # Mount frontend
