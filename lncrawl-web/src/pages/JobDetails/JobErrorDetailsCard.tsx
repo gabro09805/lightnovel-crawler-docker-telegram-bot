@@ -1,14 +1,14 @@
 import { Auth } from '@/store/_auth';
 import type { Job } from '@/types';
+import { Alert } from 'antd';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+
+const CAPTCHA_FAILURES = ['HTTPError: 403 Client Error: Forbidden for url'];
 
 export const JobErrorDetailsCard: React.FC<{ job: Job }> = ({ job }) => {
   const isAdmin = useSelector(Auth.select.isAdmin);
-
-  if (!job.error) {
-    return null;
-  }
 
   const html = useMemo(() => {
     const lines = (job.error || '')
@@ -22,6 +22,16 @@ export const JobErrorDetailsCard: React.FC<{ job: Job }> = ({ job }) => {
     }
     return 'Unknown error';
   }, [job.error, isAdmin]);
+
+  const hasCaptchaFailure = useMemo(() => {
+    return CAPTCHA_FAILURES.some((failure) =>
+      String(job.error).includes(failure)
+    );
+  }, [job.error]);
+
+  if (!job.error) {
+    return null;
+  }
 
   return (
     <div style={{ margin: '15px 0' }}>
@@ -41,6 +51,22 @@ export const JobErrorDetailsCard: React.FC<{ job: Job }> = ({ job }) => {
         }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
+      {hasCaptchaFailure && (
+        <div style={{ margin: '15px 0' }}>
+          <Alert
+            type="warning"
+            title={
+              <>
+                This issue is caused by Cloudflare captcha challenge, which
+                cannot be bypassed by our automated crawler. Please try
+                searching for your novel on{' '}
+                <Link to="/meta/sources?tab=used">other available sources</Link>{' '}
+                that are functioning properly.
+              </>
+            }
+          />
+        </div>
+      )}
     </div>
   );
 };
