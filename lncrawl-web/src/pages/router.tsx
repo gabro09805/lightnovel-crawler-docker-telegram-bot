@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- Route config exports route arrays, not components */
 import { LoadingState } from '@/components/Loading/LoadingState';
 import { AuthLayout, MainLayout, ReaderLayout } from '@/components/Layout';
 import { lazy, Suspense } from 'react';
