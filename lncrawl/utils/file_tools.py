@@ -11,9 +11,6 @@ from .platforms import Platform
 logger = logging.getLogger(__name__)
 
 
-__re_invalid_name = re.compile(r'[\s<>:"/\\|?*\x00-\x1F]+', re.M)
-
-
 def format_size(num_bytes: int, decimals: int = 1, suffix: str = "B") -> str:
     """
     Convert a size in bytes into a human-readable string representing the size,
@@ -67,9 +64,22 @@ def folder_size(folder: Union[str, Path]) -> int:
         return 0
 
 
+# Invalid characters for Windows + control chars
+_RE_INVALID = re.compile(r'[#<>:"/\\|?*\x00-\x1F]+', re.M | re.U)
+
+# Windows reserved device names
+_WINDOWS_RESERVED = {
+    "CON", "PRN", "AUX", "NUL",
+    *(f"COM{i}" for i in range(1, 10)),
+    *(f"LPT{i}" for i in range(1, 10)),
+}
+
+
 def safe_filename(name: str) -> str:
-    name = __re_invalid_name.sub(' ', name)
-    name = name.strip(" .")[:255]
+    name = _RE_INVALID.sub(' ', name)
+    name = name.strip(" .")[:250]
+    if name.upper() in _WINDOWS_RESERVED:
+        name = f"_{name}"
     return name or "untitled"
 
 

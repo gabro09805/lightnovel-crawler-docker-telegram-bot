@@ -4,7 +4,8 @@ import os
 import re
 from pathlib import Path
 from typing import Dict
-
+import html
+import unicodedata
 from PIL.Image import Image
 
 from ...context import ctx
@@ -17,9 +18,13 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_CHAPTER_PER_VOLUME = 100
 
+_RE_SPACES = re.compile(r'\s+')
 
-def __format_title(text):
-    return re.sub(r"\s+", " ", str(text or '')).strip().title()
+
+def format_title(text):
+    name = html.unescape(str(text or ''))
+    name = unicodedata.normalize("NFKC", name)
+    return _RE_SPACES.sub(" ", name).strip().title()
 
 
 def __format_volume(crawler: Crawler, vol_id_map: Dict[int, int]):
@@ -40,7 +45,7 @@ def __format_volume(crawler: Crawler, vol_id_map: Dict[int, int]):
         item.id = index + 1
         item.chapter_count = 0
         item.extra['crawler_version'] = getattr(crawler, 'version')
-        item.title = __format_title(item.title) or f'Volume {item.id}'
+        item.title = format_title(item.title) or f'Volume {item.id}'
 
 
 def __format_chapters(crawler: Crawler, vol_id_map: Dict[int, int]):
@@ -52,7 +57,7 @@ def __format_chapters(crawler: Crawler, vol_id_map: Dict[int, int]):
     for index, item in enumerate(crawler.chapters):
         item.id = index + 1
         item.extra['crawler_version'] = getattr(crawler, 'version')
-        item.title = __format_title(item.title) or f'Chapter {item.id}'
+        item.title = format_title(item.title) or f'Chapter {item.id}'
 
         default_vol = 1 + (index // DEFAULT_CHAPTER_PER_VOLUME)
         vol_index = vol_id_map.get(item.volume or default_vol)
@@ -72,8 +77,8 @@ def format_novel(crawler: Crawler):
     __format_chapters(crawler, vol_id_map)
     crawler.volumes = [x for x in crawler.volumes if x.chapter_count]
 
-    crawler.novel_title = __format_title(crawler.novel_title)
-    crawler.novel_author = __format_title(crawler.novel_author)
+    crawler.novel_title = format_title(crawler.novel_title)
+    crawler.novel_author = format_title(crawler.novel_author)
     crawler.novel_tags = list(filter(None, map(normalize, set(crawler.novel_tags))))
 
 

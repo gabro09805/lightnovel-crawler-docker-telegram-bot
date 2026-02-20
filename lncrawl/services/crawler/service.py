@@ -10,7 +10,7 @@ from ...core.crawler import Crawler
 from ...dao import Chapter, ChapterImage, Novel
 from ...exceptions import ServerErrors
 from ...models import Chapter as ChapterModel
-from .utils import download_cover, download_image, format_novel
+from .utils import download_cover, download_image, format_novel, format_title
 
 logger = logging.getLogger(__name__)
 
@@ -141,7 +141,7 @@ class CrawlerService:
         # get chapter content
         model = ChapterModel(
             id=chapter.serial,
-            title=chapter.title,
+            title=format_title(chapter.title),
             url=str(url),
             extras=chapter.extra,
         )
