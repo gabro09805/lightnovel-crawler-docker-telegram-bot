@@ -21,27 +21,7 @@ class DB:
 
     @cached_property
     def engine(self):
-        db_url = ctx.config.db.url
-
-        connect_args = {}
-        if 'postgres' in db_url or 'mysql' in db_url:
-            connect_args['connect_timeout'] = ctx.config.db.connect_timeout
-
-        engine = sa.create_engine(
-            db_url,
-            echo=ctx.logger.is_debug,
-            # Pool configuration for connection management
-            pool_size=ctx.config.db.pool_size,
-            pool_timeout=ctx.config.db.pool_timeout,
-            pool_recycle=ctx.config.db.pool_recycle,
-            max_overflow=ctx.config.db.pool_size * 3,  # Maximum overflow connections allowed
-            pool_pre_ping=True,  # Test connections before using them (handles disconnects gracefully)
-            # Connection arguments for database-specific settings
-            connect_args=connect_args,
-        )
-        if ctx.logger.is_debug:
-            engine.logger = logger
-        return engine
+        return self._create_engine(ctx.config.db.url)
 
     def close(self):
         if "engine" in self.__dict__:
@@ -141,34 +121,64 @@ class DB:
             context = MigrationContext.configure(conn)
             return context.get_current_revision()
 
-    def _ensure_database(self) -> None:
+    def _create_engine(self, db_url: str, **kwargs):
+        kwargs.setdefault('echo', ctx.logger.is_debug)
+
+        # Connection arguments for database-specific settings
+        connect_args: dict = kwargs.setdefault('connect_args', {})
+        if 'postgres' in db_url or 'mysql' in db_url:
+            connect_args.setdefault('connect_timeout', ctx.config.db.connect_timeout)
+
+        # Pool configuration for connection management
+        kwargs.setdefault('pool_size', ctx.config.db.pool_size)
+        kwargs.setdefault('pool_timeout', ctx.config.db.pool_timeout)
+        kwargs.setdefault('pool_recycle', ctx.config.db.pool_recycle)
+
+        # Maximum overflow connections allowed
+        kwargs.setdefault('max_overflow', ctx.config.db.pool_size * 3)
+
+        # Test connections before using them (handles disconnects gracefully)
+        kwargs.setdefault('pool_pre_ping', True)
+
+        # Create the engine
+        engine = sa.create_engine(db_url, **kwargs)
+        if ctx.logger.is_debug:
+            engine.logger = logger
+
+        return engine
+
+    def _ensure_database(self, max_retries=10) -> None:
         """Create the database if it doesn't exist (MySQL and PostgreSQL only)."""
         db_url = ctx.config.db.url
         logger.info(f'Database URL: "{db_url}"')
-        try:
-            # Parse the database URL
-            parsed = urlparse(db_url)
-            scheme = parsed.scheme
-            database = parsed.path.lstrip("/")
-            if not database:
-                raise ValueError("No database name found in the URL")
 
-            # Create a connection URL without the database name
-            if "mysql" in scheme :
-                server_url = db_url.replace(f"/{database}", "")
-                check_query = sa.text("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :db_name")
-                create_query = sa.text(f"CREATE DATABASE `{database}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
-            elif "postgres" in scheme :
-                server_url = db_url.replace(f"/{database}", "/postgres")
-                check_query = sa.text("SELECT 1 FROM pg_database WHERE datname = :db_name")
-                create_query = sa.text(f'CREATE DATABASE "{database}"')
-            elif 'sqlite' in scheme:
-                return  # sqlite doesn't need database creation
-            else:
-                raise ValueError("Unsupported database")
+        # Parse the database URL
+        parsed = urlparse(db_url)
+        scheme = parsed.scheme
+        database = parsed.path.lstrip("/")
+        if not database:
+            raise ValueError("No database name found in the URL")
 
-            # Try to connect to the server and check/create database
-            engine = sa.create_engine(server_url, isolation_level="AUTOCOMMIT")
+        # Create a connection URL without the database name
+        if "mysql" in scheme :
+            server_url = db_url.replace(f"/{database}", "")
+            check_query = sa.text("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :db_name")
+            create_query = sa.text(f"CREATE DATABASE `{database}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+        elif "postgres" in scheme :
+            server_url = db_url.replace(f"/{database}", "/postgres")
+            check_query = sa.text("SELECT 1 FROM pg_database WHERE datname = :db_name")
+            create_query = sa.text(f'CREATE DATABASE "{database}"')
+        elif 'sqlite' in scheme:
+            return  # sqlite doesn't need database creation
+        else:
+            raise ValueError("Unsupported database")
+
+        # Try to connect to the server and check/create database
+        engine = self._create_engine(
+            server_url,
+            isolation_level="AUTOCOMMIT",
+        )
+        for attempt in range(1, max_retries + 1):
             try:
                 with engine.connect() as conn:
                     logger.info(f"Ensuring database '{database}' exists...")
@@ -178,7 +188,10 @@ class DB:
                         logger.info(f"Creating database '{database}'.")
                         conn.execute(create_query)
                         logger.info(f"Database '{database}' created.")
-            finally:
                 engine.dispose()
-        except Exception as e:
-            logger.warning(f"Failed to ensure database exists. {e}")
+                return
+            except Exception as e:
+                if attempt == max_retries:
+                    logger.warning(f"Failed to ensure database exists. {e}")
+                else:
+                    logger.info(f'Failed to ensure database. Retrying... {attempt}/{max_retries}')
