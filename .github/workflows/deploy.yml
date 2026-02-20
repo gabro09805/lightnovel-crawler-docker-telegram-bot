@@ -30,9 +30,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_SECRET }}
 
-      - name: Update SSH Known Hosts
-        run: ssh-keyscan -H "${{ env.SSH_HOST }}" >> ~/.ssh/known_hosts
-
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
