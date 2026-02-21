@@ -107,7 +107,8 @@ class UserService:
         self,
         offset: int = 0,
         limit: int = 20,
-        search: Optional[str] = None
+        search: Optional[str] = None,
+        referrer: Optional[str] = None,
     ) -> Paginated[User]:
         with ctx.db.session() as sess:
             stmt = sa.select(User)
@@ -125,6 +126,9 @@ class UserService:
                         sa.cast(User.tier, sa.String).ilike(q),
                     )
                 )
+
+            if referrer:
+                conditions.append(User.referrer_id == referrer)
 
             if conditions:
                 cnt = cnt.where(*conditions)

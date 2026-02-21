@@ -7,7 +7,7 @@ import { formatDate } from '@/utils/time';
 import { CalendarOutlined } from '@ant-design/icons';
 import { Card, Col, Flex, Grid, Row, Space, Typography } from 'antd';
 import { Link } from 'react-router-dom';
-import { UserActionButtons } from './UserActionButtons';
+import { UserStatusActions } from './UserStatusActions';
 
 export const UserListItemCard: React.FC<{
   user: User;
@@ -115,7 +115,7 @@ export const UserListItemCard: React.FC<{
               justify="end"
               style={{ minWidth: 100 }}
             >
-              <UserActionButtons user={user} onChange={onChange} />
+              <UserStatusActions user={user} onChange={onChange} />
             </Flex>
           </Col>
         )}

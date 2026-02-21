@@ -1,282 +1,189 @@
-import { ErrorState } from '@/components/Loading/ErrorState';
-import { LoadingState } from '@/components/Loading/LoadingState';
 import { UserAvatar } from '@/components/Tags/UserAvatar';
 import { UserRoleTag } from '@/components/Tags/UserRoleTag';
 import { UserStatusTag } from '@/components/Tags/UserStatusTag';
 import { UserTierTag } from '@/components/Tags/UserTierTag';
-import type { User } from '@/types';
-import { stringifyError } from '@/utils/errors';
+import { Auth } from '@/store/_auth';
+import type { Paginated, User } from '@/types';
 import { formatDate, formatFromNow } from '@/utils/time';
 import {
   CalendarOutlined,
   CrownOutlined,
-  DeleteOutlined,
   IdcardOutlined,
   MailOutlined,
+  NodeIndexOutlined,
   SafetyCertificateOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import {
-  Button,
-  Descriptions,
-  Divider,
-  Flex,
-  Grid,
-  message,
-  Popconfirm,
-  Space,
-  Tag,
-  Typography,
-} from 'antd';
+import { Descriptions, Divider, Grid, Space, Tag, Typography } from 'antd';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { UserActionButtons } from '../UserList/UserActionButtons';
-import { UserEditButton } from './UserEditButton';
-import { UserDetailsCard } from '../JobDetails/UserDetailsCard';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { UserStatusActions } from '../UserList/UserStatusActions';
 
-export const UserDetailSection: React.FC<{ userId: string }> = ({ userId }) => {
-  const navigate = useNavigate();
+export const UserDetailSection: React.FC<{
+  user: User;
+  onChange: () => any;
+}> = ({ user, onChange }) => {
   const { xs } = Grid.useBreakpoint();
-  const [messageApi, contextHolder] = message.useMessage();
+  const currentUser = useSelector(Auth.select.user);
 
-  const [user, setUser] = useState<User>();
-  const [refreshId, setRefreshId] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>();
-  const [deleting, setDeleting] = useState(false);
   const [isVerified, setIsVerified] = useState<boolean>();
-  const [referrer, setReferrer] = useState<User>();
+  const [referenceCount, setReferenceCount] = useState<number>(0);
 
   useEffect(() => {
-    const fetchUser = async (id: string) => {
-      setError(undefined);
+    const fetchVerified = async () => {
       try {
-        const { data } = await axios.get<User>(`/api/user/${id}`);
-        setUser(data);
-      } catch (err: any) {
-        setError(stringifyError(err));
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser(userId);
-  }, [userId, refreshId]);
-
-  useEffect(() => {
-    const fetchVerified = async (id: string) => {
-      try {
-        const { data } = await axios.get<boolean>(`/api/user/${id}/verified`);
+        const { data } = await axios.get<boolean>(
+          `/api/user/${user.id}/verified`
+        );
         setIsVerified(data);
       } catch {
         setIsVerified(undefined);
       }
     };
-    fetchVerified(userId);
-  }, [userId, refreshId]);
+    fetchVerified();
+  }, [user.id]);
 
   useEffect(() => {
-    if (!user?.referrer_id) {
-      setReferrer(undefined);
-      return;
-    }
-
-    const fetchReferrer = async (id: string) => {
+    const fetchReferenceCount = async () => {
       try {
-        const { data } = await axios.get<User>(`/api/user/${id}`);
-        setReferrer(data);
+        const { data } = await axios.get<Paginated<User>>(`/api/users`, {
+          params: {
+            limit: 0,
+            referrer: user.id,
+          },
+        });
+        setReferenceCount(data.total);
       } catch {
-        setReferrer(undefined);
+        setReferenceCount(0);
       }
     };
-    fetchReferrer(user.referrer_id);
-  }, [user?.referrer_id]);
-
-  const handleDelete = async () => {
-    setDeleting(true);
-    try {
-      await axios.delete(`/api/user/${userId}`);
-      messageApi.success('Permanently deleted the user');
-      navigate('/admin/users');
-    } catch (err) {
-      console.error(err);
-      messageApi.error(stringifyError(err));
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  if (loading) {
-    return <LoadingState />;
-  }
-
-  if (error || !user) {
-    return (
-      <ErrorState
-        error={error}
-        title="Failed to load user details"
-        onRetry={() => {
-          setLoading(true);
-          setRefreshId((v) => v + 1);
-        }}
-      />
-    );
-  }
+    fetchReferenceCount();
+  }, [user.id]);
 
   return (
-    <>
-      {contextHolder}
-
-      <Typography.Title level={2}>
-        <UserOutlined /> Profile
-      </Typography.Title>
-
-      <Descriptions
-        bordered
-        column={1}
-        size="middle"
-        layout={xs ? 'vertical' : 'horizontal'}
-        styles={{ label: { width: 150, fontWeight: 500 } }}
-      >
-        <Descriptions.Item
-          label={
-            <Space>
-              <IdcardOutlined /> User ID
-            </Space>
-          }
-        >
-          <Typography.Text copyable>{user.id}</Typography.Text>
-        </Descriptions.Item>
-
-        <Descriptions.Item
-          label={
-            <Space>
-              <UserOutlined /> Name
-            </Space>
-          }
-        >
+    <Descriptions
+      bordered
+      column={1}
+      size="middle"
+      layout={xs ? 'vertical' : 'horizontal'}
+      styles={{ label: { width: 150, fontWeight: 500 } }}
+    >
+      <Descriptions.Item
+        label={
           <Space>
-            <UserAvatar user={user} size={32} />
-            <Typography.Text>{user.name}</Typography.Text>
+            <UserOutlined /> Name
           </Space>
-        </Descriptions.Item>
+        }
+      >
+        <Space>
+          <UserAvatar user={user} size={32} />
+          <Typography.Text>{user.name}</Typography.Text>
+        </Space>
+      </Descriptions.Item>
 
-        <Descriptions.Item
-          label={
-            <Space>
-              <MailOutlined /> Email
-            </Space>
-          }
-        >
-          <Typography.Text copyable>{user.email}</Typography.Text>
-        </Descriptions.Item>
-
-        <Descriptions.Item
-          label={
-            <Space>
-              <IdcardOutlined /> Role
-            </Space>
-          }
-        >
-          <UserRoleTag value={user.role} />
-        </Descriptions.Item>
-
-        <Descriptions.Item
-          label={
-            <Space>
-              <CrownOutlined /> Tier
-            </Space>
-          }
-        >
-          <UserTierTag value={user.tier} />
-        </Descriptions.Item>
-
-        <Descriptions.Item
-          label={
-            <Space>
-              <SafetyCertificateOutlined /> Verified
-            </Space>
-          }
-        >
-          <Tag color={isVerified ? 'success' : 'error'}>
-            {isVerified ? 'Yes' : 'No'}
-          </Tag>
-        </Descriptions.Item>
-
-        <Descriptions.Item
-          label={
-            <Space>
-              <UserOutlined /> Status
-            </Space>
-          }
-        >
-          <Space separator={<Divider orientation="vertical" />}>
-            <UserStatusTag value={user.is_active} />
-            <UserActionButtons
-              user={user}
-              onChange={() => setRefreshId((v) => v + 1)}
-            />
+      <Descriptions.Item
+        label={
+          <Space>
+            <MailOutlined /> Email
           </Space>
-        </Descriptions.Item>
+        }
+      >
+        <Typography.Text copyable>{user.email}</Typography.Text>
+      </Descriptions.Item>
 
-        <Descriptions.Item
-          label={
-            <Space>
-              <CalendarOutlined /> Joined
-            </Space>
-          }
-        >
-          <Typography.Text>{formatDate(user.created_at)}</Typography.Text>
-          <Divider orientation="vertical" />
-          <Typography.Text type="secondary">
-            {formatFromNow(user.created_at)}
-          </Typography.Text>
-        </Descriptions.Item>
+      <Descriptions.Item
+        label={
+          <Space>
+            <IdcardOutlined /> Role
+          </Space>
+        }
+      >
+        <UserRoleTag value={user.role} />
+      </Descriptions.Item>
 
-        <Descriptions.Item
-          label={
-            <Space>
-              <CalendarOutlined /> Last Update
-            </Space>
-          }
-        >
-          <Typography.Text>{formatDate(user.updated_at)}</Typography.Text>
-          <Divider orientation="vertical" />
-          <Typography.Text type="secondary">
-            {formatFromNow(user.updated_at)}
-          </Typography.Text>
-        </Descriptions.Item>
-      </Descriptions>
+      <Descriptions.Item
+        label={
+          <Space>
+            <CrownOutlined /> Tier
+          </Space>
+        }
+      >
+        <UserTierTag value={user.tier} />
+      </Descriptions.Item>
 
-      {referrer && <UserDetailsCard user={referrer} title="Referred By" />}
+      <Descriptions.Item
+        label={
+          <Space>
+            <SafetyCertificateOutlined /> Verified
+          </Space>
+        }
+      >
+        <Tag color={isVerified ? 'success' : 'error'}>
+          {isVerified ? 'Yes' : 'No'}
+        </Tag>
+      </Descriptions.Item>
 
-      <Flex wrap gap={8} align="center" justify="end" style={{ marginTop: 10 }}>
-        <UserEditButton
-          user={user}
-          block={xs}
-          size="large"
-          shape="round"
-          onChange={() => setRefreshId((v) => v + 1)}
-        />
-        <Popconfirm
-          title="Are you sure?"
-          description="This will permanently delete the user."
-          okText="Yes, delete"
-          okType="danger"
-          cancelText="Cancel"
-          onConfirm={handleDelete}
-        >
-          <Button
-            block={xs}
-            size="large"
-            shape="round"
-            icon={<DeleteOutlined />}
-            loading={deleting}
-          >
-            Delete Permanently
-          </Button>
-        </Popconfirm>
-      </Flex>
-    </>
+      <Descriptions.Item
+        label={
+          <Space>
+            <UserOutlined /> Status
+          </Space>
+        }
+      >
+        <UserStatusTag value={user.is_active} />
+        {user.id !== currentUser?.id && (
+          <>
+            <Divider orientation="vertical" />
+            <UserStatusActions user={user} onChange={onChange} />
+          </>
+        )}
+      </Descriptions.Item>
+
+      <Descriptions.Item
+        label={
+          <Space>
+            <NodeIndexOutlined /> References
+          </Space>
+        }
+      >
+        <Typography.Text>{referenceCount} users</Typography.Text>
+        {referenceCount > 0 && (
+          <>
+            <Divider orientation="vertical" />
+            <Link to={`/admin/users?referrer=${user.id}`}>See references</Link>
+          </>
+        )}
+      </Descriptions.Item>
+
+      <Descriptions.Item
+        label={
+          <Space>
+            <CalendarOutlined /> Joined
+          </Space>
+        }
+      >
+        <Typography.Text>{formatDate(user.created_at)}</Typography.Text>
+        <Divider orientation="vertical" />
+        <Typography.Text type="secondary">
+          {formatFromNow(user.created_at)}
+        </Typography.Text>
+      </Descriptions.Item>
+
+      <Descriptions.Item
+        label={
+          <Space>
+            <CalendarOutlined /> Last Update
+          </Space>
+        }
+      >
+        <Typography.Text>{formatDate(user.updated_at)}</Typography.Text>
+        <Divider orientation="vertical" />
+        <Typography.Text type="secondary">
+          {formatFromNow(user.updated_at)}
+        </Typography.Text>
+      </Descriptions.Item>
+    </Descriptions>
   );
 };

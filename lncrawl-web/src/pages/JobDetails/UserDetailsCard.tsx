@@ -8,10 +8,10 @@ import { CalendarOutlined } from '@ant-design/icons';
 import { Card, Col, Flex, Row, Space, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 
-export const UserDetailsCard: React.FC<{ user: User; title?: string }> = ({
-  user,
-  title,
-}) => {
+export const UserDetailsCard: React.FC<{
+  user: User;
+  title?: string;
+}> = ({ user, title }) => {
   return (
     <Card variant="outlined">
       <Typography.Title level={4} style={{ margin: 0, marginBottom: 16 }}>

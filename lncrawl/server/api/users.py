@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Body, Path, Query, Security
 
 from ...context import ctx
@@ -15,8 +17,14 @@ def list_users(
     search: str = Query(default=""),
     offset: int = Query(default=0),
     limit: int = Query(default=20, le=100),
+    referrer: Optional[str] = Query(None),
 ) -> Paginated[User]:
-    return ctx.users.list(offset, limit, search)
+    return ctx.users.list(
+        offset,
+        limit,
+        search=search,
+        referrer=referrer,
+    )
 
 
 @router.post("", summary="Create an user")

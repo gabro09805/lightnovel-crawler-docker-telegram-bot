@@ -6,7 +6,7 @@ import { Button, message } from 'antd';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 
-export const UserActionButtons: React.FC<{
+export const UserStatusActions: React.FC<{
   user: User;
   onChange?: () => any;
 }> = ({ user, onChange }) => {

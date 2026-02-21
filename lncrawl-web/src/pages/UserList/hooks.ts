@@ -25,34 +25,42 @@ export function useUserList() {
     [searchParams]
   );
 
+  const referrerId = useMemo(
+    () => searchParams.get('referrer') || undefined,
+    [searchParams]
+  );
+
   const perPage = 10;
   const currentPage = useMemo(
     () => parseInt(searchParams.get('page') || '1', 10),
     [searchParams]
   );
 
-  const fetchUsers = async (search: string, page: number, limit: number) => {
-    setError(undefined);
-    try {
-      const offset = (page - 1) * limit;
-      const { data } = await axios.get<Paginated<User>>('/api/users', {
-        params: { search, offset, limit },
-      });
-      setTotal(data.total);
-      setUsers(data.items);
-    } catch (err: any) {
-      setError(stringifyError(err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    const tid = setTimeout(() => {
-      fetchUsers(search, currentPage, perPage);
-    }, 50);
+    const fetchUsers = async () => {
+      setError(undefined);
+      try {
+        const offset = (currentPage - 1) * perPage;
+        const { data } = await axios.get<Paginated<User>>('/api/users', {
+          params: {
+            search,
+            offset,
+            limit: perPage,
+            referrer: referrerId,
+          },
+        });
+        setTotal(data.total);
+        setUsers(data.items);
+      } catch (err: any) {
+        setError(stringifyError(err));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const tid = setTimeout(fetchUsers, 50);
     return () => clearTimeout(tid);
-  }, [search, currentPage, refreshId]);
+  }, [search, currentPage, referrerId, refreshId]);
 
   const refresh = useCallback(() => {
     setRefreshId((v) => v + 1);
@@ -85,6 +93,7 @@ export function useUserList() {
     total,
     loading,
     error,
+    referrerId,
     refresh,
     updateParams,
   };

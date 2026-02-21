@@ -4,6 +4,7 @@ import { TeamOutlined } from '@ant-design/icons';
 import { Divider, Flex, Input, List, Pagination, Typography } from 'antd';
 import { useUserList } from './hooks';
 import { UserListItemCard } from './UserListItemCard';
+import { ReferrerCard } from '../UserDetails/ReferrerCard';
 
 export const UserListPage: React.FC<any> = () => {
   const {
@@ -14,6 +15,7 @@ export const UserListPage: React.FC<any> = () => {
     loading,
     total,
     users,
+    referrerId,
     refresh,
     updateParams,
   } = useUserList();
@@ -37,6 +39,8 @@ export const UserListPage: React.FC<any> = () => {
       <Typography.Title level={2}>
         <TeamOutlined /> Users
       </Typography.Title>
+
+      <ReferrerCard referrerId={referrerId} />
 
       <Divider size="small" />
 
