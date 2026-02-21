@@ -25,6 +25,7 @@ export interface User extends _Base {
   role: UserRole;
   tier: UserTier;
   is_active: boolean;
+  referrer_id?: string;
 
   extra: {
     email_alerts?: Record<NotificationItem, boolean>;

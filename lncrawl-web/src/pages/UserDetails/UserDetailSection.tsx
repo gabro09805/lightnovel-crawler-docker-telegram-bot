@@ -33,6 +33,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserActionButtons } from '../UserList/UserActionButtons';
 import { UserEditButton } from './UserEditButton';
+import { UserDetailsCard } from '../JobDetails/UserDetailsCard';
 
 export const UserDetailSection: React.FC<{ userId: string }> = ({ userId }) => {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ export const UserDetailSection: React.FC<{ userId: string }> = ({ userId }) => {
   const [error, setError] = useState<string>();
   const [deleting, setDeleting] = useState(false);
   const [isVerified, setIsVerified] = useState<boolean>();
+  const [referrer, setReferrer] = useState<User>();
 
   useEffect(() => {
     const fetchUser = async (id: string) => {
@@ -72,6 +74,23 @@ export const UserDetailSection: React.FC<{ userId: string }> = ({ userId }) => {
     };
     fetchVerified(userId);
   }, [userId, refreshId]);
+
+  useEffect(() => {
+    if (!user?.referrer_id) {
+      setReferrer(undefined);
+      return;
+    }
+
+    const fetchReferrer = async (id: string) => {
+      try {
+        const { data } = await axios.get<User>(`/api/user/${id}`);
+        setReferrer(data);
+      } catch (err) {
+        setReferrer(undefined);
+      }
+    };
+    fetchReferrer(user.referrer_id);
+  }, [user?.referrer_id]);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -228,6 +247,8 @@ export const UserDetailSection: React.FC<{ userId: string }> = ({ userId }) => {
           </Typography.Text>
         </Descriptions.Item>
       </Descriptions>
+
+      {referrer && <UserDetailsCard user={referrer} title="Referred By" />}
 
       <Flex wrap gap={8} align="center" justify="end" style={{ marginTop: 10 }}>
         <UserEditButton
