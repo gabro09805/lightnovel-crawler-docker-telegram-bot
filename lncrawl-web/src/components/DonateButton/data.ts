@@ -10,7 +10,7 @@ export const CRYPTO_WALLETS: CryptoInfo[] = [
   {
     name: 'Bitcoin',
     symbol: 'BTC',
-    address: '1CVjbgQpXdtzsXMA6Rtrk5WvNiWuAQnLE',
+    address: 'bc1qvlqctzf0zyhcmkaftvxhd2d6n84n8qpnyy0zn0',
     icon: '₿',
   },
   {

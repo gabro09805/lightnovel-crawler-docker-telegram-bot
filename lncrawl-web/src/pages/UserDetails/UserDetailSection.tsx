@@ -85,7 +85,7 @@ export const UserDetailSection: React.FC<{ userId: string }> = ({ userId }) => {
       try {
         const { data } = await axios.get<User>(`/api/user/${id}`);
         setReferrer(data);
-      } catch (err) {
+      } catch {
         setReferrer(undefined);
       }
     };
