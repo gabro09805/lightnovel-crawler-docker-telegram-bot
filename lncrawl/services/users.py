@@ -330,7 +330,7 @@ class UserService:
         token = encoded.decode('ascii')
         return token
 
-    def verify_user_token(self, token: str) -> str:
+    def verify_user_token(self, token: str) -> User:
         try:
             encoded = token.encode('ascii')
             encrypted = base64.urlsafe_b64decode(encoded)
@@ -350,14 +350,14 @@ class UserService:
         if time + exp < current_timestamp():
             raise ServerErrors.token_expired
 
-        return user_id
+        return self.get(user_id)
 
     def signup(self, body: SignupRequest):
-        referrer_id = self.verify_user_token(body.referrer)
+        referrer = self.verify_user_token(body.referrer)
         request = CreateRequest(
             name=body.name,
             email=body.email,
             password=body.password,
-            referrer_id=referrer_id,
+            referrer_id=referrer.id,
         )
         return self.create(request)
