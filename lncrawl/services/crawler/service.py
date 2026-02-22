@@ -2,6 +2,7 @@ import logging
 from threading import Event
 from typing import Optional, Union
 
+from box import Box
 from pydantic import HttpUrl
 from sqlmodel import select
 
@@ -117,6 +118,7 @@ class CrawlerService:
         refresh: bool = False,
     ) -> Chapter:
         chapter = ctx.chapters.get(chapter_id)
+        print(chapter.extra)
         url = HttpUrl(chapter.url)
         if not url.host:
             raise ServerErrors.invalid_url
@@ -143,7 +145,7 @@ class CrawlerService:
             id=chapter.serial,
             title=format_title(chapter.title),
             url=str(url),
-            extras=chapter.extra,
+            extras=Box(chapter.extra),
         )
         model.body = crawler.download_chapter_body(model).strip()
         crawler.extract_chapter_images(model)

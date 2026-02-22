@@ -16,7 +16,7 @@ import { Card, Divider, Flex, Grid, Space, Typography } from 'antd';
 import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { UserDetailsCard } from '../JobDetails/UserDetailsCard';
 import { FeedbackDeleteButton } from './FeedbackDeleteButton';
 import { FeedbackEditButton } from './FeedbackEditButton';
@@ -182,9 +182,9 @@ export const FeedbackDetailsPage: React.FC<any> = () => {
 
       {/* Job Details Section */}
       {job && (
-        <div style={{ marginTop: 16 }}>
+        <Link to={`/job/${job.id}`} style={{ marginTop: 16, display: 'block' }}>
           <JobDetailsCard job={job} hideActions />
-        </div>
+        </Link>
       )}
 
       {/* Admin Notes Section */}

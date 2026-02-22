@@ -22,6 +22,7 @@ class WebnovelCrawler(BasicBrowserTemplate):
     ]
 
     def initialize(self) -> None:
+        self.csrf = ''
         self.headless = True
         self.home_url = "https://www.webnovel.com/"
         bad_text = [
@@ -30,14 +31,16 @@ class WebnovelCrawler(BasicBrowserTemplate):
         ]
         self.re_cleaner = re.compile("|".join(bad_text), re.M)
 
-    def get_csrf(self):
+    def ensure_csrf(self):
+        if self.csrf:
+            return
         logger.info("Getting CSRF Token")
         self.get_response(f"{self.home_url}stories/novel")
-        self.csrf = self.cookies["_csrfToken"]
+        self.csrf = self.cookies.get("_csrfToken") or ''
         logger.debug("CSRF Token = %s", self.csrf)
 
     def search_novel_in_soup(self, query: str):
-        self.get_csrf()
+        self.ensure_csrf()
         params = {
             "_csrfToken": self.csrf,
             "pageIndex": 1,
@@ -59,14 +62,17 @@ class WebnovelCrawler(BasicBrowserTemplate):
         self.last_soup_url = self.browser.current_url
         for li in self.browser.soup.select(".search-result-container li"):
             a = li.find("a")
+            info = li.find(".g_star_num small")
+            if not a:
+                continue
             yield SearchResult(
+                title=str(a.get("data-bookname") or ''),
                 url=self.absolute_url(a.get("href")),
-                title=a.get("data-bookname"),
-                info=li.find(".g_star_num small").text.strip(),
+                info=info.get_text(strip=True) if info else '',
             )
 
     def read_novel_info_in_soup(self):
-        self.get_csrf()
+        self.ensure_csrf()
         url = self.novel_url
         if "_" not in url:
             ids = re.findall(r"/book/(\d+)", url)
@@ -120,19 +126,23 @@ class WebnovelCrawler(BasicBrowserTemplate):
 
     def parse_chapter_catalog(self, soup: BeautifulSoup) -> None:
         for div in soup.select(".j_catalog_list .volume-item"):
+            possible_title = div.find("h4")
             vol = Volume(
                 id=len(self.volumes) + 1,
-                title=div.find("h4").text.strip(),
+                title=possible_title.get_text(strip=True) if possible_title else '',
             )
             self.volumes.append(vol)
             for li in div.select("li"):
                 a = li.find("a")
+                if not a:
+                    continue
                 chap = Chapter(
                     id=len(self.chapters) + 1,
                     volume=vol.id,
-                    title=a.get("title"),
-                    cid=li.get("data-report-cid"),
+                    title=str(a.get("title") or ''),
                     url=self.absolute_url(a.get("href")),
+                    cid=li.get("data-report-cid"),
+                    book=self.novel_id,
                 )
                 self.chapters.append(chap)
 
@@ -147,19 +157,20 @@ class WebnovelCrawler(BasicBrowserTemplate):
         return body
 
     def download_chapter_body_in_soup(self, chapter: Chapter) -> str:
+        self.ensure_csrf()
         logger.info("Chapter Id: %s", chapter.cid)
 
         response = self.get_response(
             f"{self.home_url}go/pcm/chapter/getContent?encryptType=3&_fsae=0"
-            + f"&_csrfToken={self.csrf}&bookId={self.novel_id}&chapterId={chapter.cid}"
+            + f"&_csrfToken={self.csrf}&bookId={chapter.book}&chapterId={chapter.cid}"
         )
         data = response.json()
-        logger.debug("Chapter Response:\n%s", data)
 
-        assert "data" in data, "Data not found"
+        if "data" not in data:
+            return ''
         data = data["data"]
-
-        assert "chapterInfo" in data, "Chapter Info not found"
+        if "chapterInfo" not in data:
+            return ''
         chapter_info = data["chapterInfo"]
 
         chapter.title = chapter_info["chapterName"] or f"Chapter #{chapter.id}"
@@ -175,12 +186,15 @@ class WebnovelCrawler(BasicBrowserTemplate):
             ]
             return "".join([x for x in body if x.strip()])
 
+        return ''
+
     def _format_content(self, text: str):
         if ("<p>" not in text) or ("</p>" not in text):
             text = "".join(text.split("\r"))
             text = "&lt;".join(text.split("<"))
             text = "&gt;".join(text.split(">"))
-            text = [x.strip() for x in text.split("\n") if x.strip()]
-            text = "<p>" + "</p><p>".join(text) + "</p>"
-        text = self.re_cleaner.sub("", text)
+            text = "</p><p>".join([
+                x.strip() for x in text.split("\n") if x.strip()
+            ])
+        text = self.re_cleaner.sub("", f'<p>{text}</p>')
         return text.strip()

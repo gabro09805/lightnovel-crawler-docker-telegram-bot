@@ -1,9 +1,6 @@
 from typing import List
 
-from sqlalchemy import delete as sa_delete
-from sqlalchemy import insert as sa_insert
-from sqlalchemy import update as sa_update
-from sqlmodel import case, col, func, select
+import sqlmodel as sq
 
 from ..context import ctx
 from ..dao import User, UserRole, Volume
@@ -17,15 +14,15 @@ class VolumeService:
 
     def count(self, novel_id: str) -> int:
         with ctx.db.session() as sess:
-            stmt = select(func.count()).select_from(Volume)
+            stmt = sq.select(sq.func.count()).select_from(Volume)
             stmt = stmt.where(Volume.novel_id == novel_id)
             return sess.exec(stmt).one()
 
     def list(self, novel_id: str) -> List[Volume]:
         with ctx.db.session() as sess:
-            stmt = select(Volume)
+            stmt = sq.select(Volume)
             stmt = stmt.where(Volume.novel_id == novel_id)
-            stmt = stmt.order_by(col(Volume.serial).asc())
+            stmt = stmt.order_by(sq.col(Volume.serial).asc())
             items = sess.exec(stmt).all()
             return list(items)
 
@@ -38,7 +35,7 @@ class VolumeService:
 
     def get_many(self, volume_ids: List[str]) -> List[Volume]:
         with ctx.db.session() as sess:
-            stmt = select(Volume).where(col(Volume.id).in_(volume_ids))
+            stmt = sq.select(Volume).where(sq.col(Volume.id).in_(volume_ids))
             items = sess.exec(stmt).all()
             return list(items)
 
@@ -55,7 +52,7 @@ class VolumeService:
 
     def find(self, novel_id: str, serial: int) -> Volume:
         with ctx.db.session() as sess:
-            stmt = select(Volume).where(
+            stmt = sq.select(Volume).where(
                 Volume.novel_id == novel_id,
                 Volume.serial == serial,
             )
@@ -72,7 +69,7 @@ class VolumeService:
             existing = {
                 v.serial: v
                 for v in sess.exec(
-                    select(Volume)
+                    sq.select(Volume)
                     .where(Volume.novel_id == novel_id)
                 ).all()
             }
@@ -85,7 +82,7 @@ class VolumeService:
 
             if to_insert:
                 sess.exec(
-                    sa_insert(Volume),
+                    sq.insert(Volume),
                     params=[
                         Volume(
                             serial=s,
@@ -99,34 +96,26 @@ class VolumeService:
                 )
 
             if to_update:
-                title_updates = {}
-                count_updates = {}
-                for s in to_update:
-                    r = existing[s]
-                    title = wanted[s].title
-                    count = wanted[s].chapter_count
-                    if r.title != title:
-                        title_updates[r.id] = title
-                    if r.chapter_count != count:
-                        count_updates[r.id] = count
-                if title_updates:
-                    sess.exec(
-                        sa_update(Volume)
-                        .where(col(Volume.id).in_(title_updates.keys()))
-                        .values(title=case(title_updates, value=Volume.id))
-                    )
-                if count_updates:
-                    sess.exec(
-                        sa_update(Volume)
-                        .where(col(Volume.id).in_(count_updates.keys()))
-                        .values(chapter_count=case(count_updates, value=Volume.id))
-                    )
+                sess.exec(
+                    sq.update(Volume),
+                    params=[
+                        Volume(
+                            id=existing[s].id,
+                            serial=s,
+                            novel_id=novel_id,
+                            title=wanted[s].title,
+                            extra=dict(wanted[s].extra),
+                            chapter_count=wanted[s].chapter_count,
+                        ).model_dump()
+                        for s in to_update
+                    ]
+                )
 
             if to_delete:
                 sess.exec(
-                    sa_delete(Volume)
-                    .where(col(Volume.novel_id) == novel_id)
-                    .where(col(Volume.serial).in_(to_delete))
+                    sq.delete(Volume)
+                    .where(sq.col(Volume.novel_id) == novel_id)
+                    .where(sq.col(Volume.serial).in_(to_delete))
                 )
 
             sess.commit()

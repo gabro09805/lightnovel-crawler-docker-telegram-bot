@@ -1,8 +1,6 @@
 from typing import Dict, List, Optional
 
-from sqlalchemy import delete as sa_delete
-from sqlalchemy import insert as sa_insert
-from sqlmodel import col, select
+import sqlmodel as sq
 
 from ..context import ctx
 from ..dao import Chapter, ChapterImage
@@ -20,13 +18,13 @@ class ChapterImageService:
         is_crawled: Optional[bool] = None,
     ) -> List[ChapterImage]:
         with ctx.db.session() as sess:
-            stmt = select(ChapterImage)
+            stmt = sq.select(ChapterImage)
             if novel_id:
                 stmt = stmt.where(ChapterImage.novel_id == novel_id)
             if chapter_id:
                 stmt = stmt.where(ChapterImage.chapter_id == chapter_id)
             if is_crawled:
-                stmt = stmt.where(col(ChapterImage.is_done).is_(True))
+                stmt = stmt.where(sq.col(ChapterImage.is_done).is_(True))
             items = sess.exec(stmt).all()
             return list(items)
 
@@ -36,7 +34,7 @@ class ChapterImageService:
         chapter_id: Optional[str] = None,
     ) -> List[str]:
         with ctx.db.session() as sess:
-            stmt = select(ChapterImage.id)
+            stmt = sq.select(ChapterImage.id)
             if novel_id:
                 stmt = stmt.where(ChapterImage.novel_id == novel_id)
             if chapter_id:
@@ -53,7 +51,7 @@ class ChapterImageService:
 
     def get_many(self, image_ids: List[str]) -> List[ChapterImage]:
         with ctx.db.session() as sess:
-            stmt = select(ChapterImage).where(col(ChapterImage.id).in_(image_ids))
+            stmt = sq.select(ChapterImage).where(sq.col(ChapterImage.id).in_(image_ids))
             items = sess.exec(stmt).all()
             return list(items)
 
@@ -72,7 +70,7 @@ class ChapterImageService:
             existing = {
                 img.id: img
                 for img in sess.exec(
-                    select(ChapterImage)
+                    sq.select(ChapterImage)
                     .where(ChapterImage.chapter_id == chapter.id)
                 ).all()
             }
@@ -85,22 +83,23 @@ class ChapterImageService:
             if to_insert:
                 crawler_version = chapter.extra.get('crawler_version')
                 sess.exec(
-                    sa_insert(ChapterImage),
+                    sq.insert(ChapterImage),
                     params=[
                         ChapterImage(
                             id=id,
                             url=images[id],
                             chapter_id=chapter.id,
                             novel_id=chapter.novel_id,
-                            extra={'crawler_version': crawler_version},
+                            extra=dict(crawler_version=crawler_version),
                         ).model_dump()
                         for id in to_insert
                     ]
                 )
+
             if to_delete:
                 sess.exec(
-                    sa_delete(ChapterImage)
-                    .where(col(ChapterImage.id).in_(to_delete))
+                    sq.delete(ChapterImage)
+                    .where(sq.col(ChapterImage.id).in_(to_delete))
                 )
                 for id in to_delete:
                     file = existing[id].image_file

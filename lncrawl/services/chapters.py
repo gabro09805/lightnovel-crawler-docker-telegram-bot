@@ -209,38 +209,21 @@ class ChapterService:
                 )
 
             if to_update:
-                url_updates = {}
-                title_updates = {}
-                volume_updates = {}
-                for s in to_update:
-                    r = existing[s]
-                    url = wanted[s].url
-                    title = wanted[s].title
-                    vol_id = vol_id_map.get(wanted[s].volume)
-                    if r.url != url:
-                        url_updates[r.id] = url
-                    if r.title != title:
-                        title_updates[r.id] = title
-                    if r.volume_id != vol_id:
-                        volume_updates[r.id] = vol_id
-                if url_updates:
-                    sess.exec(
-                        sq.update(Chapter)
-                        .where(sq.col(Chapter.id).in_(url_updates.keys()))
-                        .values(url=sq.case(url_updates, value=Chapter.id))
-                    )
-                if title_updates:
-                    sess.exec(
-                        sq.update(Chapter)
-                        .where(sq.col(Chapter.id).in_(title_updates.keys()))
-                        .values(title=sq.case(title_updates, value=Chapter.id))
-                    )
-                if volume_updates:
-                    sess.exec(
-                        sq.update(Chapter)
-                        .where(sq.col(Chapter.id).in_(volume_updates.keys()))
-                        .values(volume_id=sq.case(volume_updates, value=Chapter.id))
-                    )
+                sess.exec(
+                    sq.update(Chapter),
+                    params=[
+                        Chapter(
+                            id=existing[s].id,
+                            serial=s,
+                            novel_id=novel_id,
+                            url=wanted[s].url,
+                            title=wanted[s].title,
+                            extra=dict(wanted[s].extra),
+                            volume_id=vol_id_map.get(wanted[s].volume),
+                        ).model_dump()
+                        for s in to_update
+                    ]
+                )
 
             if to_delete:
                 sess.exec(
