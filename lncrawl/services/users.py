@@ -350,7 +350,11 @@ class UserService:
         if time + exp < current_timestamp():
             raise ServerErrors.token_expired
 
-        return self.get(user_id)
+        user = self.get(user_id)
+        if not user.is_active:
+            raise ServerErrors.inactive_user
+
+        return user
 
     def signup(self, body: SignupRequest):
         referrer = self.verify_user_token(body.referrer)

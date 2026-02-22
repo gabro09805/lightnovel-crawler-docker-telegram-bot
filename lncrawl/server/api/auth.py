@@ -119,5 +119,6 @@ def generate_user_token(
 @router.get('/verify-token', summary='Verify a user token')
 def verify_user_token(
     token: str = Query(description='User token')
-) -> User:
-    return ctx.users.verify_user_token(token)
+) -> bool:
+    user = ctx.users.verify_user_token(token)
+    return user.is_active
