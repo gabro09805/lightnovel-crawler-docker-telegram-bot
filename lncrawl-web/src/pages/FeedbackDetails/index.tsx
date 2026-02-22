@@ -3,7 +3,7 @@ import { LoadingState } from '@/components/Loading/LoadingState';
 import { FeedbackStatusTag } from '@/components/Tags/FeedbackStatusTag';
 import { FeedbackTypeTag } from '@/components/Tags/FeedbackTypeTag';
 import { Auth } from '@/store/_auth';
-import type { Feedback, Job, User } from '@/types';
+import type { Feedback, Job, Novel, User } from '@/types';
 import { FeedbackStatus } from '@/types';
 import { stringifyError } from '@/utils/errors';
 import { formatFromNow } from '@/utils/time';
@@ -22,6 +22,7 @@ import { FeedbackDeleteButton } from './FeedbackDeleteButton';
 import { FeedbackEditButton } from './FeedbackEditButton';
 import { FeedbackRespondButton } from './FeedbackRespondButton';
 import { JobDetailsCard } from '../JobDetails/JobDetailsCard';
+import { NovelDetailsCard } from '../NovelDetails/NovelDetailsCard';
 
 export const FeedbackDetailsPage: React.FC<any> = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,12 +31,13 @@ export const FeedbackDetailsPage: React.FC<any> = () => {
   const user = useSelector(Auth.select.user);
   const isAdmin = useSelector(Auth.select.isAdmin);
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>();
   const [feedback, setFeedback] = useState<Feedback>();
   const [owner, setOwner] = useState<User>();
   const [job, setJob] = useState<Job>();
+  const [novel, setNovel] = useState<Novel>();
   const [refreshId, setRefreshId] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>();
 
   const isOwner = useMemo(
     () => Boolean(feedback && user && feedback.user_id === user.id),
@@ -44,15 +46,19 @@ export const FeedbackDetailsPage: React.FC<any> = () => {
 
   useEffect(() => {
     const fetchJob = async (jobId: string) => {
-      setError(undefined);
+      setJob(undefined);
       try {
         const { data } = await axios.get<Job>(`/api/job/${jobId}`);
         setJob(data);
-      } catch (err: any) {
-        setError(stringifyError(err));
-      } finally {
-        setLoading(false);
-      }
+      } catch {}
+    };
+
+    const fetchNovel = async (novelId: string) => {
+      setNovel(undefined);
+      try {
+        const { data } = await axios.get<Novel>(`/api/novel/${novelId}`);
+        setNovel(data);
+      } catch {}
     };
 
     const fetchFeedback = async (feedbackId: string) => {
@@ -64,6 +70,9 @@ export const FeedbackDetailsPage: React.FC<any> = () => {
         setFeedback(data);
         if (data.extra?.job_id) {
           fetchJob(data.extra.job_id);
+        }
+        if (data.extra?.novel_id) {
+          fetchNovel(data.extra.novel_id);
         }
       } catch (err: any) {
         setError(stringifyError(err));
@@ -184,6 +193,16 @@ export const FeedbackDetailsPage: React.FC<any> = () => {
       {job && (
         <Link to={`/job/${job.id}`} style={{ marginTop: 16, display: 'block' }}>
           <JobDetailsCard job={job} hideActions />
+        </Link>
+      )}
+
+      {/* Job Details Section */}
+      {novel && (
+        <Link
+          to={`/novel/${novel.id}`}
+          style={{ marginTop: 16, display: 'block' }}
+        >
+          <NovelDetailsCard novel={novel} />
         </Link>
       )}
 

@@ -203,5 +203,8 @@ export interface Feedback extends _Base {
   extra: {
     user_name?: string;
     job_id?: string;
+    job_error?: string;
+    novel_id?: string;
+    chapter_id?: string;
   };
 }

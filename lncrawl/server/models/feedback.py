@@ -20,4 +20,4 @@ class FeedbackUpdateRequest(BaseModel):
 
 class FeedbackRespondRequest(BaseModel):
     status: FeedbackStatus = Field(description="Status of the feedback")
-    admin_notes: str = Field(description="Admin notes/response", min_length=1, max_length=5000)
+    admin_notes: Optional[str] = Field(default='', description="Admin notes/response", max_length=5000)

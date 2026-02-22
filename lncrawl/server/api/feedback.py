@@ -82,7 +82,7 @@ def respond_to_feedback(
         user=user,
         feedback_id=feedback_id,
         status=body.status,
-        admin_notes=body.admin_notes,
+        admin_notes=body.admin_notes or '',
     )
 
 

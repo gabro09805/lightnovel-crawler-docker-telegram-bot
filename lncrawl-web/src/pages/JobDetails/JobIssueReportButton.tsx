@@ -18,18 +18,17 @@ export const JobIssueReportButton: React.FC<{
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (values: {
-    type: FeedbackType;
-    subject: string;
-    message: string;
-  }) => {
+  const handleSubmit = async () => {
     setLoading(true);
     try {
       const { data } = await axios.post<Feedback>('/api/feedback', {
-        ...values,
+        type: FeedbackType.ISSUE,
+        subject: form.getFieldValue('subject'),
+        message: form.getFieldValue('message'),
         extra: {
+          ...job.extra,
           job_id: job.id,
-          novel_id: job.extra.novel_id,
+          job_error: job.error,
         },
       });
       messageApi.success('Feedback submitted successfully! Thank you.');
@@ -77,12 +76,21 @@ export const JobIssueReportButton: React.FC<{
           autoComplete="off"
           labelCol={{ style: { padding: 0 } }}
           initialValues={{
-            type: FeedbackType.ISSUE,
             subject: `Job Failed: ${job.job_title || job.id}`,
-            message: '',
+            message: [
+              job.extra.url && `URL: ${job.extra.url}`,
+              job.extra.novel_title && `Novel: ${job.extra.novel_title}`,
+              job.extra.chapter_serial &&
+                `Chapter: ${job.extra.chapter_serial}`,
+              job.extra.volume_serial && `Volume: ${job.extra.volume_serial}`,
+              job.extra.format && `Format: ${job.extra.format}`,
+              job.error &&
+                `Error: ${job.error.trim().split('\n').reverse()[0]}`,
+            ]
+              .filter(Boolean)
+              .join('\n'),
           }}
         >
-          <Form.Item name="type" hidden />
           <Form.Item
             name="subject"
             label="Subject"
@@ -121,7 +129,12 @@ export const JobIssueReportButton: React.FC<{
               <Button onClick={() => setOpen(false)} disabled={loading}>
                 Cancel
               </Button>
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                onClick={handleSubmit}
+                loading={loading}
+              >
                 Submit
               </Button>
             </Flex>
