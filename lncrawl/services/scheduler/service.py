@@ -79,10 +79,10 @@ class JobScheduler:
     def _loop(self, run: Callable[[Event], None], interval: int) -> None:
         while self.running:
             try:
+                run(self._signal)
                 self._signal.wait(interval)
                 if self._signal.is_set():
                     return
-                run(self._signal)
             except KeyboardInterrupt:
                 self._signal.set()
             except AbortedException:

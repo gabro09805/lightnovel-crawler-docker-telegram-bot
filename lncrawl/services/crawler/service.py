@@ -118,7 +118,6 @@ class CrawlerService:
         refresh: bool = False,
     ) -> Chapter:
         chapter = ctx.chapters.get(chapter_id)
-        print(chapter.extra)
         url = HttpUrl(chapter.url)
         if not url.host:
             raise ServerErrors.invalid_url

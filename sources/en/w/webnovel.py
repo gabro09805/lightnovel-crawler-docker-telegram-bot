@@ -134,15 +134,16 @@ class WebnovelCrawler(BasicBrowserTemplate):
             self.volumes.append(vol)
             for li in div.select("li"):
                 a = li.find("a")
-                if not a:
+                cid = li.get("data-report-cid")
+                if not a or not cid:
                     continue
                 chap = Chapter(
                     id=len(self.chapters) + 1,
                     volume=vol.id,
                     title=str(a.get("title") or ''),
                     url=self.absolute_url(a.get("href")),
-                    cid=li.get("data-report-cid"),
                     book=self.novel_id,
+                    cid=cid,
                 )
                 self.chapters.append(chap)
 

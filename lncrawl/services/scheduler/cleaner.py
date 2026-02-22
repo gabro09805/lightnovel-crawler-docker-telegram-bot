@@ -2,9 +2,13 @@ import logging
 import shutil
 from threading import Event
 
+import sqlmodel as sq
+
 from ...context import ctx
+from ...dao import Job, JobStatus
 from ...exceptions import AbortedException
 from ...utils.file_tools import folder_size, format_size
+from ...utils.time_utils import current_timestamp
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +21,8 @@ class Cleaner:
     def run(signal: Event):
         cleaner = Cleaner(signal)
         cleaner.free_disk_size()
+        cleaner.delete_old_jobs()
+        cleaner.cancel_long_jobs()
 
     def free_disk_size(self):
         size_limit = ctx.config.crawler.disk_size_limit
@@ -53,3 +59,47 @@ class Cleaner:
                     break
 
         logger.info(f"Current folder size: {format_size(current_size)}")
+
+    def delete_old_jobs(self):
+        day = 24 * 3600 * 1000
+        now = current_timestamp()
+        with ctx.db.session() as sess:
+            job_ids = sess.exec(
+                sq.select(Job.id)
+                .where(
+                    sq.or_(
+                        sq.and_(
+                            sq.col(Job.parent_job_id).is_not(None),
+                            Job.updated_at < now - 15 * day,
+                        ),
+                        sq.and_(
+                            Job.status != JobStatus.PENDING,
+                            Job.updated_at < now - 90 * day
+                        ),
+                    )
+                )
+            ).all()
+
+        logger.info(f"Deleting {len(job_ids)} jobs")
+        for job_id in job_ids:
+            if self.signal.is_set():
+                return
+            ctx.jobs.delete(job_id)
+
+    def cancel_long_jobs(self):
+        hour = 3600 * 1000
+        now = current_timestamp()
+        with ctx.db.session() as sess:
+            job_ids = sess.exec(
+                sq.select(Job.id)
+                .where(
+                    Job.status == JobStatus.RUNNING,
+                    Job.updated_at < now - 16 * hour
+                )
+            ).all()
+
+        logger.info(f"Canceling {len(job_ids)} jobs")
+        for job_id in job_ids:
+            if self.signal.is_set():
+                return
+            ctx.jobs.cancel(job_id)
