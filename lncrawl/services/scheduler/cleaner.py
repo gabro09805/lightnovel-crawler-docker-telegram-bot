@@ -5,7 +5,7 @@ from threading import Event
 import sqlmodel as sq
 
 from ...context import ctx
-from ...dao import Job, JobStatus
+from ...dao import Job, JobStatus, UserToken
 from ...exceptions import AbortedException
 from ...utils.file_tools import folder_size, format_size
 from ...utils.time_utils import current_timestamp
@@ -23,6 +23,7 @@ class Cleaner:
         cleaner.free_disk_size()
         cleaner.delete_old_jobs()
         cleaner.cancel_long_jobs()
+        cleaner.delete_expired_tokens()
 
     def free_disk_size(self):
         size_limit = ctx.config.crawler.disk_size_limit
@@ -64,27 +65,32 @@ class Cleaner:
         day = 24 * 3600 * 1000
         now = current_timestamp()
         with ctx.db.session() as sess:
+            # find root jobs to delete
             job_ids = sess.exec(
                 sq.select(Job.id)
                 .where(
-                    sq.or_(
-                        sq.and_(
-                            sq.col(Job.parent_job_id).is_not(None),
-                            Job.updated_at < now - 15 * day,
-                        ),
-                        sq.and_(
-                            Job.status != JobStatus.PENDING,
-                            Job.updated_at < now - 90 * day
-                        ),
-                    )
+                    sq.col(Job.parent_job_id).is_(None),
+                    Job.status != JobStatus.PENDING,
+                    Job.updated_at < now - 90 * day
                 )
             ).all()
 
-        logger.info(f"Deleting {len(job_ids)} jobs")
-        for job_id in job_ids:
-            if self.signal.is_set():
-                return
-            ctx.jobs.delete(job_id)
+            # delete child jobs
+            sess.exec(
+                sq.delete(Job)
+                .where(
+                    sq.col(Job.parent_job_id).is_not(None),
+                    sq.col(Job.updated_at) < now - 15 * day
+                )
+            )
+            sess.commit()
+
+        if len(job_ids) > 0:
+            logger.info(f"Deleting {len(job_ids)} jobs")
+            for job_id in job_ids:
+                if self.signal.is_set():
+                    return
+                ctx.jobs.delete(job_id)
 
     def cancel_long_jobs(self):
         hour = 3600 * 1000
@@ -93,13 +99,24 @@ class Cleaner:
             job_ids = sess.exec(
                 sq.select(Job.id)
                 .where(
+                    sq.col(Job.parent_job_id).is_(None),
                     Job.status == JobStatus.RUNNING,
                     Job.updated_at < now - 16 * hour
                 )
             ).all()
 
-        logger.info(f"Canceling {len(job_ids)} jobs")
-        for job_id in job_ids:
-            if self.signal.is_set():
-                return
-            ctx.jobs.cancel(job_id)
+        if len(job_ids) > 0:
+            logger.info(f"Canceling {len(job_ids)} jobs")
+            for job_id in job_ids:
+                if self.signal.is_set():
+                    return
+                ctx.jobs.cancel(job_id)
+
+    def delete_expired_tokens(self):
+        now = current_timestamp()
+        with ctx.db.session() as sess:
+            sess.exec(
+                sq.delete(UserToken)
+                .where(sq.col(UserToken.expires_at) < now)
+            )
+            sess.commit()

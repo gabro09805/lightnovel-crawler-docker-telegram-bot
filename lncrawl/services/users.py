@@ -1,17 +1,16 @@
-import base64
-import hashlib
 import logging
 import secrets
-import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 import sqlmodel as sa
 from jose import jwt
 from passlib.context import CryptContext
+from sqlalchemy.exc import IntegrityError
 
 from ..context import ctx
-from ..dao import NotificationItem, User, UserRole, UserTier, VerifiedEmail
+from ..dao import (NotificationItem, User, UserRole, UserTier, UserToken,
+                   VerifiedEmail)
 from ..exceptions import ServerErrors
 from ..server.models import (CreateRequest, LoginRequest, Paginated,
                              PasswordUpdateRequest, SignupRequest,
@@ -315,42 +314,32 @@ class UserService:
         ctx.mail.send_reset_password_link(email, link)
 
     def generate_user_token(self, user: User) -> str:
-        user_id = user.id
-        time = current_timestamp()
-
-        t_bytes = time.to_bytes(8, 'little')
-        id_bytes = uuid.UUID(user_id).bytes
-
-        t_key = hashlib.sha3_256(t_bytes).digest()[:16]
-        encrypted_id = bytes(x ^ y for x, y in zip(id_bytes, t_key))
-
-        encrypted = t_bytes + encrypted_id
-
-        encoded = base64.urlsafe_b64encode(encrypted)
-        token = encoded.decode('ascii')
-        return token
+        with ctx.db.session() as sess:
+            day = 24 * 3600 * 1000
+            exp = current_timestamp() + 15 * day
+            for _ in range(10):  # try multiple times in case of duplicate token
+                try:
+                    user_token = UserToken(
+                        user_id=user.id,
+                        expires_at=exp,
+                    )
+                    sess.add(user_token)  # fails here on duplicate token
+                    sess.commit()
+                    return user_token.token
+                except IntegrityError:
+                    continue
+            raise ServerErrors.server_error  # unlikely to reach
 
     def verify_user_token(self, token: str) -> User:
-        try:
-            encoded = token.encode('ascii')
-            encrypted = base64.urlsafe_b64decode(encoded)
+        with ctx.db.session() as sess:
+            user_token = sess.get(UserToken, token)
+            if not user_token:
+                raise ServerErrors.token_invalid
 
-            t_bytes = encrypted[:8]
-            t_key = hashlib.sha3_256(t_bytes).digest()[:16]
-
-            encrypted_id = encrypted[8:]
-            id_bytes = bytes(x ^ y for x, y in zip(encrypted_id, t_key))
-
-            time = int.from_bytes(t_bytes, 'little')
-            user_id = str(uuid.UUID(bytes=id_bytes))
-        except Exception as e:
-            raise ServerErrors.token_invalid from e
-
-        exp = ctx.config.server.token_expiry * (60 * 1000)
-        if time + exp < current_timestamp():
+        if user_token.expires_at < current_timestamp():
             raise ServerErrors.token_expired
 
-        user = self.get(user_id)
+        user = self.get(user_token.user_id)
         if not user.is_active:
             raise ServerErrors.inactive_user
 

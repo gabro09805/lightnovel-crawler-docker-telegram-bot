@@ -30,9 +30,6 @@ class Library(BaseTable, table=True):
 
 class LibraryNovel(sa.SQLModel, table=True):
     __tablename__ = "library_novels"  # type: ignore
-    __table_args__ = (
-        sa.UniqueConstraint("library_id", "novel_id"),
-    )
 
     library_id: str = sa.Field(
         foreign_key="libraries.id",
