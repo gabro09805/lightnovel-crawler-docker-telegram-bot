@@ -10,7 +10,6 @@ import {
   KeyOutlined,
   LockOutlined,
   MailOutlined,
-  SafetyCertificateOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import { Descriptions, Divider, Grid, Space, Typography } from 'antd';
