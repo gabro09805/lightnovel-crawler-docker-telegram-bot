@@ -63,10 +63,59 @@ export const MobileNavbar: React.FC<{
     navigate(path);
   };
 
-  if (drawerOpen) {
-    return (
+  return (
+    <>
+      <Flex
+        gap={4}
+        align="center"
+        justify="space-between"
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          padding: '0 5px',
+          userSelect: 'none',
+          background: token.colorBgContainer,
+          boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.06)',
+          borderTop: `1px solid ${token.colorBorderSecondary}`,
+          ...style,
+        }}
+      >
+        <NavbarButton
+          label="Requests"
+          icon={<DeploymentUnitOutlined />}
+          active={currentPath === '/'}
+          onClick={() => handleNavClick('/')}
+        />
+        <NavbarButton
+          label="Novels"
+          icon={<BookOutlined />}
+          active={currentPath === '/novels'}
+          onClick={() => handleNavClick('/novels')}
+        />
+        <NavbarButton
+          label="Libraries"
+          icon={<FolderOpenOutlined />}
+          active={currentPath === '/libraries'}
+          onClick={() => handleNavClick('/libraries')}
+        />
+        <NavbarButton
+          label="Crawlers"
+          icon={<FileDoneOutlined />}
+          active={currentPath === '/meta/sources'}
+          onClick={() => handleNavClick('/meta/sources')}
+        />
+        <NavbarButton
+          label="More"
+          icon={<MenuFoldOutlined />}
+          onClick={() => setDrawerOpen((v) => !v)}
+        />
+      </Flex>
+
       <Drawer
-        open
+        open={drawerOpen}
         size={250}
         closable={false}
         placement="right"
@@ -83,57 +132,6 @@ export const MobileNavbar: React.FC<{
           style={{ position: 'absolute', top: 10, right: 10, zIndex: 5 }}
         />
       </Drawer>
-    );
-  }
-
-  return (
-    <Flex
-      gap={4}
-      align="center"
-      justify="space-between"
-      style={{
-        position: 'sticky',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1000,
-        padding: '0 5px',
-        userSelect: 'none',
-        background: token.colorBgContainer,
-        boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.06)',
-        borderTop: `1px solid ${token.colorBorderSecondary}`,
-        ...style,
-      }}
-    >
-      <NavbarButton
-        label="Requests"
-        icon={<DeploymentUnitOutlined />}
-        active={currentPath === '/'}
-        onClick={() => handleNavClick('/')}
-      />
-      <NavbarButton
-        label="Novels"
-        icon={<BookOutlined />}
-        active={currentPath === '/novels'}
-        onClick={() => handleNavClick('/novels')}
-      />
-      <NavbarButton
-        label="Libraries"
-        icon={<FolderOpenOutlined />}
-        active={currentPath === '/libraries'}
-        onClick={() => handleNavClick('/libraries')}
-      />
-      <NavbarButton
-        label="Crawlers"
-        icon={<FileDoneOutlined />}
-        active={currentPath === '/meta/sources'}
-        onClick={() => handleNavClick('/meta/sources')}
-      />
-      <NavbarButton
-        label="More"
-        icon={<MenuFoldOutlined />}
-        onClick={() => setDrawerOpen((v) => !v)}
-      />
-    </Flex>
+    </>
   );
 };

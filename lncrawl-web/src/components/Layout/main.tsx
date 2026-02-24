@@ -49,7 +49,7 @@ const MainLayoutMobile: React.FC<any> = () => {
           minHeight: '100vh',
           position: 'relative',
           padding: 10,
-          paddingBottom: 80,
+          paddingBottom: 120,
         }}
       >
         <MobileLayoutHeader />

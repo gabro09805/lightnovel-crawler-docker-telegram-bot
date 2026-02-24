@@ -1,7 +1,9 @@
+from typing import List
+
 from fastapi import APIRouter, Body, Form, Query, Security
 
 from ...context import ctx
-from ...dao import User
+from ...dao import User, UserToken
 from ..models import (ForgotPasswordRequest, LoginRequest, LoginResponse,
                       NameUpdateRequest, PasswordUpdateRequest,
                       ResetPasswordRequest, SignupRequest, TokenResponse,
@@ -109,7 +111,7 @@ def verify_otp(
 
 
 @router.post('/me/create-token', summary='Generate a user token')
-def generate_user_token(
+def generate_my_token(
     user: User = Security(ensure_user),
 ) -> TokenResponse:
     token = ctx.users.generate_user_token(user)
@@ -122,3 +124,10 @@ def verify_user_token(
 ) -> bool:
     user = ctx.users.verify_user_token(token)
     return user.is_active
+
+
+@router.post('/me/tokens', summary='List all of my tokens')
+def list_my_tokens(
+    user: User = Security(ensure_user),
+) -> List[UserToken]:
+    return ctx.users.list_user_tokens(user.id)

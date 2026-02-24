@@ -16,15 +16,15 @@ import {
 } from '@ant-design/icons';
 import { Descriptions, Divider, Grid, Space, Typography } from 'antd';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { ProfileGenerateTokenButton } from './ProfileGenerateTokenButton';
 import { ProfileNameChangeButton } from './ProfileNameChangeButton';
 import { ProfilePasswordChangeButton } from './ProfilePasswordChangeButton';
-import { useEffect } from 'react';
 
 export const UserProfilePage: React.FC<any> = () => {
   const { xs } = Grid.useBreakpoint();
   const user = useSelector(Auth.select.user)!;
+  const [token, setToken] = useState<string>();
 
   const updateUser = async () => {
     const result = await axios.get<User>(`/api/auth/me`);
@@ -34,6 +34,20 @@ export const UserProfilePage: React.FC<any> = () => {
   useEffect(() => {
     updateUser();
   }, []);
+
+  useEffect(() => {
+    const generateToken = async () => {
+      try {
+        const result = await axios.post<{ token: string }>(
+          '/api/auth/me/create-token'
+        );
+        setToken(result.data.token);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    generateToken();
+  }, [user.id]);
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
@@ -76,16 +90,6 @@ export const UserProfilePage: React.FC<any> = () => {
         <Descriptions.Item
           label={
             <Space>
-              <SafetyCertificateOutlined /> Role
-            </Space>
-          }
-        >
-          <UserRoleTag value={user.role} />
-        </Descriptions.Item>
-
-        <Descriptions.Item
-          label={
-            <Space>
               <CrownOutlined /> Tier
             </Space>
           }
@@ -93,19 +97,28 @@ export const UserProfilePage: React.FC<any> = () => {
           <UserTierTag value={user.tier} />
         </Descriptions.Item>
 
-        <Descriptions.Item
-          label={
-            <Space>
-              <CalendarOutlined /> Joined
+        {token && (
+          <Descriptions.Item
+            label={
+              <Space>
+                <KeyOutlined /> Token
+              </Space>
+            }
+          >
+            <Space vertical size={0}>
+              <Typography.Text
+                copyable
+                style={{ fontSize: 16, fontFamily: 'monospace' }}
+              >
+                {token}
+              </Typography.Text>
+
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                This token is valid for a limited time only.
+              </Typography.Text>
             </Space>
-          }
-        >
-          <Typography.Text>{formatDate(user.created_at)}</Typography.Text>
-          <Divider orientation="vertical" />
-          <Typography.Text type="secondary">
-            {formatFromNow(user.created_at)}
-          </Typography.Text>
-        </Descriptions.Item>
+          </Descriptions.Item>
+        )}
 
         <Descriptions.Item
           label={
@@ -120,11 +133,15 @@ export const UserProfilePage: React.FC<any> = () => {
         <Descriptions.Item
           label={
             <Space>
-              <KeyOutlined /> Token
+              <CalendarOutlined /> Joined
             </Space>
           }
         >
-          <ProfileGenerateTokenButton />
+          <Typography.Text>{formatDate(user.created_at)}</Typography.Text>
+          <Divider orientation="vertical" />
+          <Typography.Text type="secondary">
+            {formatFromNow(user.created_at)}
+          </Typography.Text>
         </Descriptions.Item>
       </Descriptions>
     </div>

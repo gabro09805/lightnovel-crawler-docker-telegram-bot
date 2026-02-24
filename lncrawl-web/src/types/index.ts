@@ -32,6 +32,12 @@ export interface User extends _Base {
   };
 }
 
+export interface UserToken {
+  user_id: string;
+  token: string;
+  expires_at: number;
+}
+
 export interface LoginResponse {
   user: User;
   token: string;

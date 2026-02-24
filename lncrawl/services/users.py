@@ -314,14 +314,24 @@ class UserService:
         ctx.mail.send_reset_password_link(email, link)
 
     def generate_user_token(self, user: User) -> str:
+        day = 24 * 3600 * 1000
+        now = current_timestamp()
         with ctx.db.session() as sess:
-            day = 24 * 3600 * 1000
-            exp = current_timestamp() + 15 * day
+            # check for existing token
+            latest_token = sess.exec(
+                sa.select(UserToken)
+                .where(UserToken.user_id == user.id)
+                .order_by(sa.desc(UserToken.expires_at))
+            ).first()
+            if latest_token and latest_token.expires_at > now + 3 * day:
+                return latest_token.token
+
+            # create new token
             for _ in range(10):  # try multiple times in case of duplicate token
                 try:
                     user_token = UserToken(
                         user_id=user.id,
-                        expires_at=exp,
+                        expires_at=now + 15 * day,
                     )
                     sess.add(user_token)  # fails here on duplicate token
                     sess.commit()
@@ -344,6 +354,15 @@ class UserService:
             raise ServerErrors.inactive_user
 
         return user
+
+    def list_user_tokens(self, user_id: str) -> List[UserToken]:
+        with ctx.db.session() as sess:
+            tokens = sess.exec(
+                sa.select(UserToken)
+                .where(UserToken.user_id == user_id)
+                .order_by(sa.desc(UserToken.expires_at))
+            ).all()
+            return list(tokens)
 
     def signup(self, body: SignupRequest):
         referrer = self.verify_user_token(body.referrer)

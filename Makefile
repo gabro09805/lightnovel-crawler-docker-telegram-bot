@@ -81,7 +81,7 @@ watch-server:
 	$(PY) -m lncrawl -ll server --watch
 
 start-web:
-	$(YARN) dev
+	$(YARN) dev -- --host
 
 start:
 	+$(MAKE) -j2 watch-server start-web
