@@ -10,8 +10,9 @@ if sys.version_info[:2] < (3, 8):
 ROOT = Path(__file__).resolve().parent
 
 # Determine venv directory: use VIRTUAL_ENV if set, otherwise detect based on OS
-if os.getenv("VIRTUAL_ENV"):
-    VENV_DIR = Path(os.getenv("VIRTUAL_ENV")).relative_to(ROOT).as_posix()
+VENV_DIR = os.getenv("VIRTUAL_ENV")
+if VENV_DIR:
+    VENV_DIR = Path(VENV_DIR).relative_to(ROOT).as_posix()
 elif (ROOT / ".venv-win").exists():
     VENV_DIR = ".venv-win"
 elif (ROOT / ".venv-posix").exists():

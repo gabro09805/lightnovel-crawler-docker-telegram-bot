@@ -3,6 +3,8 @@ name: Build Base Image
 on:
   workflow_dispatch: {}
   push:
+    branches:
+      - dev
     paths:
       - "Dockerfile.base"
       - ".github/workflows/docker-base.yml"
@@ -21,6 +23,7 @@ jobs:
 
     env:
       REGISTRY: ghcr.io
+      IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/lncrawl-base:latest
 
     steps:
       - name: 📥 Checkout

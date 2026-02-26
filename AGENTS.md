@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build & Development Commands
 
 ```bash
-# Setup virtual environment with uv (creates .venv-posix on Linux/Mac, .venv-win on Windows)
+# Setup virtual environment with uv (creates .venv)
 make setup
 
 # Install Python and web dependencies

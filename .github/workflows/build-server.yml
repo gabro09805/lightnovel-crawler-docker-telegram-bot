@@ -1,4 +1,4 @@
-name: Server Deployment
+name: Build Server
 
 on:
   workflow_dispatch: {}
@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build-server:
     if: github.repository == 'lncrawl/lightnovel-crawler'
     runs-on: ubuntu-latest
 

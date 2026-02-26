@@ -1,11 +1,10 @@
 name: Generate Policy HTML
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
   push:
     branches:
       - dev
-      - main
     paths:
       - "PRIVACY_POLICY.md"
       - "TERMS_OF_SERVICE.md"
