@@ -59,10 +59,9 @@ export const RequestNovelCard: React.FC<any> = () => {
         <Alert
           type="warning"
           showIcon
-          message={error}
-          closable
-          onClose={() => setError('')}
+          title={error}
           style={{ marginTop: '15px' }}
+          closable={{ onClose: () => setError('') }}
         />
       )}
       <Form.Item name="url" rules={[{ required: true, type: 'url' }]}>
@@ -70,7 +69,6 @@ export const RequestNovelCard: React.FC<any> = () => {
           <Input.TextArea
             rows={1}
             autoSize
-            autoFocus
             placeholder="Enter novel page URL"
             autoComplete="novel-page-url"
             onInput={onInput}

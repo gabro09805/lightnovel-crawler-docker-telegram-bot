@@ -27,6 +27,7 @@ const NavbarButton: React.FC<{
       style={{
         flex: 1,
         cursor: 'pointer',
+        userSelect: 'none',
         padding: '8px 16px',
         ...(active
           ? {

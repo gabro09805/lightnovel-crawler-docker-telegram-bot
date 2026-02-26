@@ -5,61 +5,63 @@ import { lazy, Suspense } from 'react';
 import { Navigate, type RouteObject } from 'react-router-dom';
 
 const FeedbackDetailsPage = lazy(() =>
-  import('./FeedbackDetails').then((m) => ({ default: m.FeedbackDetailsPage })),
+  import('./FeedbackDetails').then((m) => ({ default: m.FeedbackDetailsPage }))
 );
 const FeedbackListPage = lazy(() =>
-  import('./FeedbackList').then((m) => ({ default: m.FeedbackListPage })),
+  import('./FeedbackList').then((m) => ({ default: m.FeedbackListPage }))
 );
 const ForgotPasswordPage = lazy(() =>
-  import('./ForgotPassword').then((m) => ({ default: m.ForgotPasswordPage })),
+  import('./ForgotPassword').then((m) => ({ default: m.ForgotPasswordPage }))
 );
 const JobDetailsPage = lazy(() =>
-  import('./JobDetails').then((m) => ({ default: m.JobDetailsPage })),
+  import('./JobDetails').then((m) => ({ default: m.JobDetailsPage }))
 );
 const LibraryDetailsPage = lazy(() =>
-  import('./LibraryDetails').then((m) => ({ default: m.LibraryDetailsPage })),
+  import('./LibraryDetails').then((m) => ({ default: m.LibraryDetailsPage }))
 );
 const LibraryListPage = lazy(() =>
-  import('./LibraryList').then((m) => ({ default: m.LibraryListPage })),
+  import('./LibraryList').then((m) => ({ default: m.LibraryListPage }))
 );
 const LoginPage = lazy(() =>
-  import('./Login').then((m) => ({ default: m.LoginPage })),
+  import('./Login').then((m) => ({ default: m.LoginPage }))
 );
 const MainPage = lazy(() =>
-  import('./MainPage').then((m) => ({ default: m.MainPage })),
+  import('./HomePage').then((m) => ({ default: m.HomePage }))
 );
 const NovelDetailsPage = lazy(() =>
-  import('./NovelDetails').then((m) => ({ default: m.NovelDetailsPage })),
+  import('./NovelDetails').then((m) => ({ default: m.NovelDetailsPage }))
 );
 const NovelListPage = lazy(() =>
-  import('./NovelList').then((m) => ({ default: m.NovelListPage })),
+  import('./NovelList').then((m) => ({ default: m.NovelListPage }))
 );
 const NovelReaderPage = lazy(() =>
-  import('./NovelReader').then((m) => ({ default: m.NovelReaderPage })),
+  import('./NovelReader').then((m) => ({ default: m.NovelReaderPage }))
 );
 const ResetPasswordPage = lazy(() =>
-  import('./ResetPassword').then((m) => ({ default: m.ResetPasswordPage })),
+  import('./ResetPassword').then((m) => ({ default: m.ResetPasswordPage }))
 );
 const SettingsPage = lazy(() =>
-  import('./SettingsPage').then((m) => ({ default: m.SettingsPage })),
+  import('./SettingsPage').then((m) => ({ default: m.SettingsPage }))
 );
 const SignupPage = lazy(() =>
-  import('./Signup').then((m) => ({ default: m.SignupPage })),
+  import('./Signup').then((m) => ({ default: m.SignupPage }))
 );
 const SupportedSourcesPage = lazy(() =>
-  import('./SupportedSources').then((m) => ({ default: m.SupportedSourcesPage })),
+  import('./SupportedSources').then((m) => ({
+    default: m.SupportedSourcesPage,
+  }))
 );
 const TutorialPage = lazy(() =>
-  import('./Tutorial').then((m) => ({ default: m.TutorialPage })),
+  import('./Tutorial').then((m) => ({ default: m.TutorialPage }))
 );
 const UserDetailsPage = lazy(() =>
-  import('./UserDetails').then((m) => ({ default: m.UserDetailsPage })),
+  import('./UserDetails').then((m) => ({ default: m.UserDetailsPage }))
 );
 const UserListPage = lazy(() =>
-  import('./UserList').then((m) => ({ default: m.UserListPage })),
+  import('./UserList').then((m) => ({ default: m.UserListPage }))
 );
 const UserProfilePage = lazy(() =>
-  import('./UserProfile').then((m) => ({ default: m.UserProfilePage })),
+  import('./UserProfile').then((m) => ({ default: m.UserProfilePage }))
 );
 
 const withSuspense = (node: React.ReactNode) => (

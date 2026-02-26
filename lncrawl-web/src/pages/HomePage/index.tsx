@@ -5,9 +5,9 @@ import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { JobListPage } from '../JobList';
-import { RequestNovelCard } from '../JobList/RequestNovelCard';
+import { RequestNovelCard } from './RequestNovelCard';
 
-export const MainPage: React.FC<any> = () => {
+export const HomePage: React.FC<any> = () => {
   const user = useSelector(Auth.select.user);
   const isAdmin = useSelector(Auth.select.isAdmin);
   const [searchParams, setSearchParams] = useSearchParams();
