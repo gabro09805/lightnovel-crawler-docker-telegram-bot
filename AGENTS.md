@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build & Development Commands
 
 ```bash
-# Setup virtual environment (creates .venv-posix on Linux/Mac, .venv-win on Windows)
+# Setup virtual environment with uv (creates .venv-posix on Linux/Mac, .venv-win on Windows)
 make setup
 
 # Install Python and web dependencies
@@ -30,6 +30,12 @@ make lint          # Both Python and web
 make lint-py       # Python (flake8)
 make lint-web      # Web frontend (eslint)
 
+# Dependencies (uv)
+make add-dep httpx          # Add runtime dependency
+make add-dev black          # Add dev dependency
+make rm-dep httpx           # Remove runtime dependency
+make rm-dev black           # Remove dev dependency
+
 # Run from source directly
 python lncrawl     # Or: python -m lncrawl
 ```
@@ -47,6 +53,7 @@ python lncrawl     # Or: python -m lncrawl
 **Location**: `sources/` - Organized by language (`en/`, `zh/`, `ja/`, etc.), English further split alphabetically
 
 **Key Base Classes**:
+
 - `lncrawl/core/crawler.py`: `Crawler` class - extend this to create new source crawlers
   - Required: `read_novel_info()`, `download_chapter_body()`
   - Optional: `initialize()`, `login()`, `search_novel()`
@@ -54,6 +61,7 @@ python lncrawl     # Or: python -m lncrawl
 - `lncrawl/core/taskman.py`: `TaskManager` - ThreadPoolExecutor for concurrent operations
 
 **Crawler Registration**: `lncrawl/services/sources/service.py`
+
 - Crawlers auto-discovered by importing Python files from source directories
 - Each crawler has: `__id__`, `base_url`, `version` metadata
 - Full-text search index for fast source lookup
@@ -61,12 +69,14 @@ python lncrawl     # Or: python -m lncrawl
 ### Server/API
 
 **FastAPI Server**: `lncrawl/server/app.py`
+
 - REST API at `/api`, frontend at `/`
 - Endpoints in `lncrawl/server/api/`: novels, chapters, volumes, jobs, artifacts, auth, libraries
 
 ### Output Generation
 
 **Binder Service**: `lncrawl/services/binder/`
+
 - `epub.py`: Native EPUB generation (primary format)
 - `calibre.py`: Converts EPUB to other formats (MOBI, PDF, DOCX, etc.) via Calibre
 - `json.py`, `text.py`: JSON and plain text formats
@@ -83,6 +93,7 @@ Key services available on `ctx`: `config`, `db`, `http`, `sources`, `crawler`, `
 ### Web Frontend
 
 **Location**: `lncrawl-web/`
+
 - React 19 with TypeScript, Vite, Ant Design
 - Redux Toolkit for state management
 - SCSS for styling

@@ -20,15 +20,14 @@ FROM ${BASE_IMAGE} AS app
 
 WORKDIR /app
 
-# Install requirements
-COPY requirements.txt ./
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system --no-cache -r requirements.txt
-
-# Copy files
-COPY sources ./sources
+# Install dependencies and project with uv
+COPY pyproject.toml uv.lock ./
 COPY lncrawl ./lncrawl
+COPY sources ./sources
 COPY --from=web /app/lncrawl/server/web ./lncrawl/server/web
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
 
 # Custom data path
 ENV LNCRAWL_DATA_PATH=/data

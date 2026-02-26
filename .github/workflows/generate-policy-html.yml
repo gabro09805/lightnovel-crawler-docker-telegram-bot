@@ -39,10 +39,10 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: 📦 Install Dependencies
-        run: uv pip install --system -r requirements.txt
+        run: uv sync --frozen
 
       - name: ⚙️ Generate HTML files
-        run: python ./scripts/generate_policy_html.py
+        run: uv run python ./scripts/generate_policy_html.py
 
       - name: ✅ Commit and Push HTML files
         uses: stefanzweifel/git-auto-commit-action@v6

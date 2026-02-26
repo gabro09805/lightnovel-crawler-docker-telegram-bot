@@ -1,16 +1,12 @@
-# Required variables
 ifeq ($(OS),Windows_NT)
 	PYTHON := python
 	VENV := .venv-win
-	PY := $(VENV)/Scripts/python
-	FLAKE8 := $(VENV)/Scripts/flake8
+	UV_VENV := set VIRTUAL_ENV=$(VENV) && set UV_PROJECT_ENVIRONMENT=$(VENV) && uv
 	YARN := yarn --cwd lncrawl-web
 else
 	PYTHON := python3
 	VENV := .venv-posix
-	PY := $(VENV)/bin/python
-	FLAKE8 := $(VENV)/bin/flake8
-	# Use NVM if available, otherwise fall back to system yarn
+	UV_VENV := VIRTUAL_ENV=$(VENV) UV_PROJECT_ENVIRONMENT=$(VENV) uv
 	ifneq ($(wildcard $(NVM_DIR)/nvm-exec),)
 		YARN := "$(NVM_DIR)/nvm-exec" yarn --cwd lncrawl-web
 	else
@@ -18,16 +14,15 @@ else
 	endif
 endif
 
+PKG := $(word 2,$(MAKECMDGOALS))
 VERSION := $(shell $(PYTHON) -c "print(open('lncrawl/VERSION').read().strip())")
 
-# Default target (help/info)
-.PHONY: all version clean setup install-py install-web install build-web build-wheel build-exe build start-server watch-server start-web start lint-py lint-web lint pull remove-tag push-tag push-tag-force docker-build docker-up docker-down docker-logs
+.PHONY: all version clean ensure-uv setup install-py install-web install add-dep add-dev rm-dep rm-dev build-web build-wheel build-exe build start-server watch-server start-web start lint-py lint-web lint pull remove-tag push-tag push-tag-force docker-build docker-up docker-down docker-logs
 all: version
 
 version:
 	@echo Current version: $(VERSION)
 
-# Clean target
 clean:
 ifeq ($(OS),Windows_NT)
 	@powershell -Command "try { Remove-Item -ErrorAction SilentlyContinue -Recurse -Force $(VENV), logs, build, dist } catch {}; exit 0"
@@ -36,49 +31,49 @@ ifeq ($(OS),Windows_NT)
 	@powershell -Command "Get-ChildItem -ErrorAction SilentlyContinue -Recurse -Directory -Filter 'node_modules' | Remove-Item -Recurse -Force"
 else
 	@rm -rf $(VENV) logs build dist
-	@find . -name '*.egg-info' -type d -exec rm -rf '{}'
-	@find . -name '__pycache__' -type d -exec rm -rf '{}'
-	@find . -name 'node_modules' -type d -exec rm -rf '{}'
+	@find . -depth -name '*.egg-info' -type d -exec rm -rf '{}' \; 2>/dev/null || true
+	@find . -depth -name '__pycache__' -type d -exec rm -rf '{}' \; 2>/dev/null || true
+	@find . -depth -name 'node_modules' -type d -exec rm -rf '{}' \; 2>/dev/null || true
 endif
 
+ensure-uv:
+ifeq ($(OS),Windows_NT)
+	@where uv >nul 2>nul || powershell -NoProfile -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+else
+	@command -v uv >/dev/null 2>&1 || (curl -LsSf https://astral.sh/uv/install.sh | sh)
+endif
 
-# Setup virtual environment in .venv
-setup:
+setup: ensure-uv
 ifeq ($(wildcard $(VENV)/pyvenv.cfg),)
-	$(PYTHON) -m venv $(VENV)
-	$(PY) -m pip install -q -U pip
+	uv venv $(VENV) --python $(PYTHON)
 else
 	$(info $(VENV) already exists.)
 endif
 
-# Install dependencies in .venv
 install-py: setup
-	$(PY) -m pip install -r requirements.txt
+	$(UV_VENV) sync --extra dev
 
-# Install node modules in lncrawl-web
 install-web:
 	$(YARN) install
 
 install: install-py install-web
 
-# Build wheel package and executable
 build-web:
 	$(YARN) build
 
 build-wheel:
-	$(PY) -m build -w
+	$(UV_VENV) run python -m build -w
 
 build-exe:
-	$(PY) setup_pyi.py
+	$(UV_VENV) run python setup_pyi.py
 
 build: version install build-web build-wheel build-exe
 
-# Lint project files
 start-server:
-	$(PY) -m lncrawl -ll server
+	$(UV_VENV) run python -m lncrawl -ll server
 
 watch-server:
-	$(PY) -m lncrawl -ll server --watch
+	$(UV_VENV) run python -m lncrawl -ll server --watch
 
 start-web:
 	$(YARN) dev -- --host
@@ -86,16 +81,34 @@ start-web:
 start:
 	+$(MAKE) -j2 watch-server start-web
 
-# Lint project files
+add-dep: ensure-uv
+	@test -n "$(PKG)" || (echo "Usage: make add-dep <package>  e.g. make add-dep httpx" && exit 1)
+	uv add $(PKG)
+	$(UV_VENV) sync --extra dev
+
+add-dev: ensure-uv
+	@test -n "$(PKG)" || (echo "Usage: make add-dev <package>  e.g. make add-dev pytest" && exit 1)
+	uv add --optional dev $(PKG)
+	$(UV_ENV) sync --extra dev
+
+rm-dep: ensure-uv
+	@test -n "$(PKG)" || (echo "Usage: make rm-dep <package>  e.g. make rm-dep httpx" && exit 1)
+	uv remove $(PKG)
+	$(UV_ENV) uv sync --extra dev
+
+rm-dev: ensure-uv
+	@test -n "$(PKG)" || (echo "Usage: make rm-dev <package>  e.g. make rm-dev pytest" && exit 1)
+	uv remove --optional dev $(PKG)
+	$(UV_ENV) sync --extra dev
+
 lint-py:
-	$(FLAKE8) --config .flake8 -v --count --show-source --statistics
+	$(UV_VENV) run flake8 --config .flake8 -v --count --show-source --statistics
 
 lint-web:
 	$(YARN) lint
 
 lint: lint-py lint-web
 
-# Push tag
 pull:
 	git pull --rebase --autostash
 
@@ -113,7 +126,6 @@ push-tag-force: pull
 	git tag "v$(VERSION)"
 	git push --tags
 
-# Docker targets
 docker-build:
 	docker build -t lncrawl .
 
@@ -125,3 +137,8 @@ docker-down:
 
 docker-logs:
 	docker compose -f scripts/local-compose.yml logs -f
+
+ifneq (,$(filter add-dep add-dev rm-dep rm-dev,$(MAKECMDGOALS)))
+$(word 2,$(MAKECMDGOALS)):
+	@:
+endif

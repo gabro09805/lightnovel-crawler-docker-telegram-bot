@@ -40,13 +40,13 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: 📦 Install Dependencies
-        run: uv pip install --system -r requirements.txt flake8 build
+        run: uv sync --frozen --extra dev
 
       - name: 🧹 Lint Code
-        run: flake8 -v --count --show-source --statistics
+        run: uv run flake8 -v --count --show-source --statistics
 
       - name: 🏗️ Build Wheel
-        run: python -m build --wheel --no-isolation
+        run: uv run python -m build --wheel --no-isolation
 
       - name: 🧪 Test Wheel Installation
         run: |

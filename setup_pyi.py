@@ -67,6 +67,7 @@ def gather_data_files():
 def gather_hidden_imports():
     hidden = [
         'passlib.handlers.argon2',
+        'selenium.webdriver.chrome.options',
     ]
 
     for py_file in (ROOT / "sources").rglob("*.py"):

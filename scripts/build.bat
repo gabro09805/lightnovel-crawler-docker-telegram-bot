@@ -1,22 +1,16 @@
-@ECHO OFF 
+@ECHO OFF
 
 SET /P VERSION=<lncrawl\VERSION
 
-SET PY=python
-SET PIP=%PY% -m pip --disable-pip-version-check
+RD /S /Q "dist" ".venv" "build" "lightnovel_crawler.egg-info" 2>nul
 
-RD /S /Q "dist" ".venv" "build" "lightnovel_crawler.egg-info" &
+uv venv .venv
+SET UV_PROJECT_ENVIRONMENT=.venv
+uv sync --extra dev
 
-%PY% -m venv .venv
-CALL .venv\Scripts\activate.bat
+uv run python -m build -w
+uv run python setup_pyi.py
 
-%PIP% install -U pip
-%PIP% install -r requirements.txt
-
-%PY% -m build -w
-%PY% setup_pyi.py
-
-CALL venv\Scripts\deactivate.bat
-RD /S /Q ".venv" "build" "lightnovel_crawler.egg-info" &
+RD /S /Q ".venv" "build" "lightnovel_crawler.egg-info" 2>nul
 
 ECHO ON

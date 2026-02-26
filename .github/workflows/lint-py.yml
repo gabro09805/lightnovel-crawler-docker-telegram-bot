@@ -9,9 +9,8 @@ on:
     paths:
       - "lncrawl/**"
       - "sources/**/*.py"
-      - "requirements.txt"
       - "pyproject.toml"
-      - "setup.py"
+      - "uv.lock"
       - ".flake8"
       - ".github/workflows/lint-py.yml"
   pull_request:
@@ -20,9 +19,8 @@ on:
     paths:
       - "lncrawl/**"
       - "sources/**/*.py"
-      - "requirements.txt"
       - "pyproject.toml"
-      - "setup.py"
+      - "uv.lock"
       - ".flake8"
       - ".github/workflows/lint-py.yml"
 
@@ -56,16 +54,16 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: 📦 Install Dependencies
-        run: uv pip install --system -r requirements.txt
+        run: uv sync --frozen --extra dev
 
       - name: 🧹 Lint with flake8
-        run: flake8 -v --count --show-source --statistics
+        run: uv run flake8 -v --count --show-source --statistics
 
       - name: 🏗️ Build Wheel Package
-        run: python -m build --wheel --no-isolation
+        run: uv run python -m build --wheel --no-isolation
 
       - name: 🧪 Install lncrawl
-        run: pip install dist/lightnovel_crawler*.whl
+        run: uv pip install --system dist/lightnovel_crawler*.whl
 
       - name: 🧪 Run lncrawl
         run: lncrawl -ll sources list

@@ -4,17 +4,13 @@ VERSION=$(head -n 1 ./lncrawl/VERSION)
 
 rm -rf .venv build dist *.egg-info
 
-python3 -m venv .venv
-PY=".venv/bin/python"
-PIP=".venv/bin/pip --disable-pip-version-check"
+uv venv .venv
+export UV_PROJECT_ENVIRONMENT=.venv
+uv sync --extra dev
 
-$PIP install -U pip
-$PIP install -r requirements.txt
+uv run python -m build -w
+uv run python setup_pyi.py
 
-$PY -m build -w
-$PY setup_pyi.py
-
-deactivate
 rm -rf .venv build *.egg-info
 
 # FINISHED

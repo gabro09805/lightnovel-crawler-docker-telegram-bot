@@ -149,17 +149,19 @@ $ docker-lncrawl server
 $ git clone https://github.com/lncrawl/lightnovel-crawler
 ```
 
-- Open command prompt inside of the project folder and install requirements:
+- Install [uv](https://docs.astral.sh/uv/) then inside the project folder run:
 
 ```bash
-$ pip install -r requirements.txt
+$ uv sync --extra dev
 ```
 
 - Run the program (use python v3.8 or higher):
 
 ```bash
-$ python lncrawl
+$ uv run python -m lncrawl
 ```
+
+  Or use the Makefile: `make setup && make install` then `make start-server`.
 
 - Build docker from source:
 
