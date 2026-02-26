@@ -35,4 +35,4 @@ COPY --from=web /app/lncrawl/server/web ./lncrawl/server/web
 # Custom data path
 ENV LNCRAWL_DATA_PATH=/data
 
-ENTRYPOINT ["uv", "run", "lncrawl"]
+ENTRYPOINT ["uv", "run", "python", "-m", "lncrawl"]
