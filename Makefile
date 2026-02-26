@@ -64,7 +64,7 @@ watch-server:
 	uv run python -m lncrawl -ll server --watch
 
 start-web:
-	$(YARN) dev -- --host
+	$(YARN) dev --host
 
 start:
 	+$(MAKE) -j2 watch-server start-web

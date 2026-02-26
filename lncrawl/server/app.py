@@ -57,9 +57,11 @@ app.mount("/static", CustomStaticFiles(), name="static")
 @app.get("/{fallback:path}", include_in_schema=False)
 async def serve_web(fallback: str):
     target_file = web_dir.joinpath(fallback)
-    if target_file.is_file():
-        return FileResponse(target_file)
-    return FileResponse(
-        web_dir / "index.html",
-        headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
-    )
+    if not target_file.is_file():
+        target_file = web_dir / "index.html"
+    if target_file.name in {"index.html", "sw.js", "registerSW.js"}:
+        return FileResponse(
+            target_file,
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
+    return FileResponse(target_file)

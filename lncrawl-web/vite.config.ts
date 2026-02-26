@@ -9,12 +9,15 @@ export default defineConfig({
   build: {
     outDir: '../lncrawl/server/web',
     assetsDir: 'assets',
+    sourcemap: 'hidden',
     emptyOutDir: true,
+    chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-antd': ['antd', '@ant-design/icons'],
+          'vendor-antd': ['antd'],
+          'vendor-antd-icons': ['@ant-design/icons'],
           'vendor-redux': ['@reduxjs/toolkit', 'react-redux', 'redux-persist'],
         },
       },
@@ -25,7 +28,11 @@ export default defineConfig({
     tsconfigPaths(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['lncrawl.svg'],
+      includeAssets: [
+        'lncrawl.svg',
+        'icons/icon-192.png',
+        'icons/icon-512.png',
+      ],
       manifest: {
         name: 'Lightnovel Crawler',
         short_name: 'LNCrawl',
@@ -41,10 +48,29 @@ export default defineConfig({
             type: 'image/svg+xml',
             purpose: 'any',
           },
+          {
+            src: '/icons/icon-192.png',
+            type: 'image/png',
+            sizes: '192x192',
+            purpose: 'any',
+          },
+          {
+            src: '/icons/icon-512.png',
+            type: 'image/png',
+            sizes: '512x512',
+            purpose: 'any',
+          },
+          {
+            src: '/icons/icon-512.png',
+            type: 'image/png',
+            sizes: '512x512',
+            purpose: 'maskable',
+          },
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        cleanupOutdatedCaches: true,
+        globPatterns: ['**/*.{js,css,ico,png,svg,woff2}'],
         navigateFallbackDenylist: [/^\/api/, /^\/static/, /^\/docs/],
       },
     }),
