@@ -110,8 +110,11 @@ push-tag-force: pull
 	git tag "v$(VERSION)"
 	git push --tags
 
-docker-build:
-	docker build -t lncrawl .
+docker-base:
+	docker build -t lncrawl-base -f Dockerfile.base .
+
+docker-build: docker-base
+	docker build -t lncrawl --build-arg BASE_IMAGE=lncrawl-base .
 
 docker-up:
 	docker compose -f scripts/local-compose.yml up -d

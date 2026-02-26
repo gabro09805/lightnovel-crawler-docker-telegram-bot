@@ -1,10 +1,10 @@
 import logging
 import os
-import re
 import shlex
 import subprocess
 from pathlib import Path
 from typing import Union
+from slugify import slugify
 
 from .platforms import Platform
 
@@ -64,9 +64,6 @@ def folder_size(folder: Union[str, Path]) -> int:
         return 0
 
 
-# Invalid characters for Windows + control chars
-_RE_INVALID = re.compile(r'[#<>:"/\\|?*\x00-\x1F]+', re.M | re.U)
-
 # Windows reserved device names
 _WINDOWS_RESERVED = {
     "CON", "PRN", "AUX", "NUL",
@@ -76,8 +73,12 @@ _WINDOWS_RESERVED = {
 
 
 def safe_filename(name: str) -> str:
-    name = _RE_INVALID.sub(' ', name)
-    name = name.strip(" .")[:250]
+    name = slugify(
+        name,
+        max_length=255,
+        separator=' ',
+        regex_pattern=r'[#<>:"/\\|?*\x00-\x1F]',
+    ).strip(" .") or "untitled"
     if name.upper() in _WINDOWS_RESERVED:
         name = f"_{name}"
     return name or "untitled"

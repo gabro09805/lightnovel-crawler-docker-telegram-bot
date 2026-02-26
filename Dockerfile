@@ -22,14 +22,17 @@ WORKDIR /app
 
 # Install dependencies and project with uv
 COPY pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
+
+# Copy files
+COPY LICENSE ./
+COPY README* ./
 COPY lncrawl ./lncrawl
 COPY sources ./sources
 COPY --from=web /app/lncrawl/server/web ./lncrawl/server/web
 
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev
-
 # Custom data path
 ENV LNCRAWL_DATA_PATH=/data
 
-ENTRYPOINT ["python", "-m", "lncrawl"]
+ENTRYPOINT ["uv", "run", "lncrawl"]

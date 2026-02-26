@@ -3,7 +3,10 @@ FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim AS base
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy
+    UV_LINK_MODE=copy \
+    QTWEBENGINE_DISABLE_SANDBOX=1 \
+    QT_QPA_PLATFORM=offscreen \
+    QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox --disable-gpu --disable-software-rasterizer"
 
 # System dependencies
 RUN apt-get update -yq \
@@ -15,6 +18,7 @@ RUN apt-get update -yq \
     make \
     cmake \
     g++ \
+    libasound2 \
     libffi-dev \
     libegl1 \
     libopengl0 \

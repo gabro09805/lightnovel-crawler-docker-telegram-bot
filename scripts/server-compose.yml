@@ -53,6 +53,7 @@ services:
       # - SELENIUM_GRID=http://chrome:4444
       - DATABASE_URL=postgresql+psycopg://pguser:pgpass@postgres:5432/lncrawl
     volumes:
+      - /dev/shm:/dev/shm
       - ./appdata:/data
     restart: unless-stopped
     deploy:

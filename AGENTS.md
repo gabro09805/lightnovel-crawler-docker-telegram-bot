@@ -37,7 +37,7 @@ make rm-dep httpx           # Remove runtime dependency
 make rm-dev black           # Remove dev dependency
 
 # Run from source directly
-python lncrawl     # Or: python -m lncrawl
+uv run lncrawl
 ```
 
 ## Architecture Overview
