@@ -2,6 +2,14 @@
 all: version
 
 VERSION := $(strip $(file < lncrawl/VERSION))
+
+# Use uv from PATH, or from default install location after make setup
+ifeq ($(OS),Windows_NT)
+UV := $(shell powershell -NoProfile -Command "if (Get-Command uv -ErrorAction SilentlyContinue) { (Get-Command uv).Source } else { Join-Path $env:USERPROFILE '.local\bin\uv.exe' }")
+else
+UV := $(shell command -v uv 2>/dev/null || echo "$(HOME)/.local/bin/uv")
+endif
+
 version:
 	@echo Current version: $(VERSION)
 
@@ -17,48 +25,49 @@ else
 endif
 
 setup:
-	git submodule update --remote --merge
+	@git submodule sync
+	@git submodule update --init --remote --merge
 ifeq ($(OS),Windows_NT)
-	@where uv >nul 2>nul || powershell -NoProfile -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+	@$(UV) --version || powershell -NoProfile -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 else
-	@command -v uv >/dev/null 2>&1 || (curl -LsSf https://astral.sh/uv/install.sh | sh)
+	@$(UV) --version || (curl -LsSf https://astral.sh/uv/install.sh | sh)
 endif
 
 install: setup
-	uv sync --extra dev
+	$(UV) sync --extra dev
 
 lint:
-	uv run flake8 --config .flake8 -v --count --show-source --statistics
+	$(UV) run flake8 --config .flake8 -v --count --show-source --statistics
 
 start:
-	uv run python -m lncrawl -ll server
+	$(UV) run python -m lncrawl -ll server
 
 watch:
-	uv run python -m lncrawl -ll server --watch
+	$(UV) run python -m lncrawl -ll server --watch
 
 build-wheel:
-	uv run python -m build -w
+	$(UV) run python -m build -w
 
 build-exe:
-	uv run python setup_pyi.py
+	$(UV) run python setup_pyi.py
 
 build: version install build-wheel build-exe
 
 add-dep: setup
-	uv add $(word 2,$(MAKECMDGOALS))
-	uv sync --extra dev
+	$(UV) add $(word 2,$(MAKECMDGOALS))
+	$(UV) sync --extra dev
 
 add-dev: setup
-	uv add --optional dev $(word 2,$(MAKECMDGOALS))
-	uv sync --extra dev
+	$(UV) add --optional dev $(word 2,$(MAKECMDGOALS))
+	$(UV) sync --extra dev
 
 rm-dep: setup
-	uv remove $(word 2,$(MAKECMDGOALS))
-	uv sync --extra dev
+	$(UV) remove $(word 2,$(MAKECMDGOALS))
+	$(UV) sync --extra dev
 
 rm-dev: setup
-	uv remove --optional dev $(word 2,$(MAKECMDGOALS))
-	uv sync --extra dev
+	$(UV) remove --optional dev $(word 2,$(MAKECMDGOALS))
+	$(UV) sync --extra dev
 
 pull:
 	git pull --rebase --autostash
