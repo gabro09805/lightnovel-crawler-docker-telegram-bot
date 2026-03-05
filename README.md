@@ -27,7 +27,6 @@
 - [Supported sources](#supported-sources)
 - [Rejected sources](#rejected-sources)
 - [Supported output formats](#supported-output-formats)
-- [Sponsors](#sponsors)
 
 <a href="https://github.com/lncrawl/lightnovel-crawler"><img src="res/lncrawl-icon.png" width="128px" align="right"/></a>
 
