@@ -160,18 +160,20 @@ $ uv sync --extra dev
 $ uv run python -m lncrawl
 ```
 
-  Or use the Makefile: `make setup && make install` then `make start-server`.
+Or use the Makefile: `make install` then `make start` (or `make watch` for auto-reload).
 
-- Build docker from source:
+- Build Docker from source (builds base image then app image):
 
+```bash
+$ make docker-build
+# or: docker build -t lncrawl .   # requires existing base image
 ```
-$ docker build -t lncrawl -f Dockerfile .
-```
 
-- Run server using docker:
+- Run server with Docker Compose:
 
-```
-$ docker compose -f ./scripts/local-compose.yml up
+```bash
+$ make docker-up
+# or: docker compose -f scripts/local-compose.yml up -d
 ```
 
 ## General Usage
@@ -179,10 +181,11 @@ $ docker compose -f ./scripts/local-compose.yml up
 ### Available options
 
 <!-- auto generated command line output -->
+
 ```text
 $ lncrawl -h
-Usage: lncrawl [OPTIONS] COMMAND [ARGS]...                                     
-                                                                                
+Usage: lncrawl [OPTIONS] COMMAND [ARGS]...
+
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --verbose             -l            Log levels: -l = warn, -ll = info, -lll  │
 │                                     = debug                                  │
@@ -203,6 +206,7 @@ Usage: lncrawl [OPTIONS] COMMAND [ARGS]...
 │ server   Run web server.                                                     │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ```
+
 <!-- auto generated command line output -->
 
 ### Example Usage
@@ -248,13 +252,13 @@ Visit the [discussions](https://github.com/lncrawl/lightnovel-crawler/discussion
 
 ## For Contributors
 
-Interested in contributing? Reference the 
+Interested in contributing? Reference the
 
 - **[DeepWiki](https://deepwiki.com/lncrawl/lightnovel-crawler)** - AI generated project documentation and resources
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development setup and contribution guidelines
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Codebase architecture overview
-- **[docs/CREATING_CRAWLERS.md](docs/CREATING_CRAWLERS.md)** - How to add new source crawlers
-- **[docs/DOCKER.md](docs/DOCKER.md)** - Docker usage and deployment
+- **[.github/docs/ARCHITECTURE.md](.github/docs/ARCHITECTURE.md)** - Setting up CI on forks
+- **[.github/docs/CREATING_CRAWLERS.md](.github/docs/CREATING_CRAWLERS.md)** - How to add new source crawlers
+- **[.github/docs/DOCKER.md](.github/docs/DOCKER.md)** - Docker usage and deployment
 - **[.github/FORKING.md](.github/FORKING.md)** - Setting up CI on forks
 
 ### Quick Start for Development
@@ -272,43 +276,47 @@ make start
 Lightnovel Crawler Build System
 
 Setup & Install:
-  make setup        Create virtual environment
-  make install      Install all dependencies (Python + Web)
-  make install-py   Install Python dependencies only
-  make install-web  Install web dependencies only
+  make setup        Sync submodules, install uv if needed
+  make install      Install Python dependencies (uv sync)
 
 Development:
-  make start        Start both backend and frontend servers
-  make start-server Start backend server only
-  make start-web    Start frontend dev server only
-  make lint         Run all linters
+  make start        Start backend server
+  make watch        Start backend server with auto-reload
+  make lint         Run Python linter (flake8)
 
 Build:
-  make build        Full build (web + wheel + exe)
-  make build-web    Build frontend only
+  make build        Full build (version, install, wheel, exe)
   make build-wheel  Build Python wheel only
   make build-exe    Build PyInstaller executable
 
+Dependencies (uv):
+  make add-dep PKG   Add runtime dependency
+  make add-dev PKG   Add dev dependency
+  make rm-dep PKG    Remove runtime dependency
+  make rm-dev PKG    Remove dev dependency
+
 Docker:
-  make docker-build Build Docker image
-  make docker-up    Start containers with docker compose
-  make docker-down  Stop containers
-  make docker-logs  View container logs
+  make docker-base   Build base image (Calibre + deps)
+  make docker-build  Build base then application image
+  make docker-up     Start stack (compose)
+  make docker-down   Stop stack
+  make docker-logs   Stream container logs
 
 Other:
   make version      Show current version
-  make clean        Remove build artifacts and venvs
+  make clean        Remove .venv, build, dist
+  make pull         Git pull + submodule update
 ```
 
 ### Adding new source
 
-Run the following command to add a new source:
+**Recommended:** Copy **`sources/_examples/_01_general_soup.py`** into the right `sources/{lang}/` folder, then implement the four required methods (`parse_title`, `parse_cover`, `parse_chapter_list`, `select_chapter_body`). See [.github/docs/CREATING_CRAWLERS.md](.github/docs/CREATING_CRAWLERS.md) for the full guide.
 
-```
+You can also use the CLI to generate a crawler with ChatGPT:
+
+```bash
 $ lncrawl sources create
 ```
-
-It can auto generate the code using ChatGPT.
 
 ## Supported sources
 
@@ -470,7 +478,6 @@ We are supporting 460 sources and 390 crawlers.
 </tbody>
 </table>
 
-
 ### `ar` Arabic
 
 <table>
@@ -497,7 +504,6 @@ We are supporting 460 sources and 390 crawlers.
 </tr>
 </tbody>
 </table>
-
 
 ### `en` English
 
@@ -2216,7 +2222,6 @@ We are supporting 460 sources and 390 crawlers.
 </tbody>
 </table>
 
-
 ### `es` Spanish; Castilian
 
 <table>
@@ -2243,7 +2248,6 @@ We are supporting 460 sources and 390 crawlers.
 </tr>
 </tbody>
 </table>
-
 
 ### `fr` French
 
@@ -2291,7 +2295,6 @@ We are supporting 460 sources and 390 crawlers.
 </tr>
 </tbody>
 </table>
-
 
 ### `id` Indonesian
 
@@ -2400,7 +2403,6 @@ We are supporting 460 sources and 390 crawlers.
 </tbody>
 </table>
 
-
 ### `ja` Japanese
 
 <table>
@@ -2422,7 +2424,6 @@ We are supporting 460 sources and 390 crawlers.
 </tr>
 </tbody>
 </table>
-
 
 ### `pt` Portuguese
 
@@ -2455,7 +2456,6 @@ We are supporting 460 sources and 390 crawlers.
 </tr>
 </tbody>
 </table>
-
 
 ### `ru` Russian
 
@@ -2529,7 +2529,6 @@ We are supporting 460 sources and 390 crawlers.
 </tbody>
 </table>
 
-
 ### `tr` Turkish
 
 <table>
@@ -2546,7 +2545,6 @@ We are supporting 460 sources and 390 crawlers.
 </tr>
 </tbody>
 </table>
-
 
 ### `vi` Vietnamese
 
@@ -2579,7 +2577,6 @@ We are supporting 460 sources and 390 crawlers.
 </tr>
 </tbody>
 </table>
-
 
 ### `zh` Chinese
 
@@ -2970,5 +2967,3 @@ We are supporting 460 sources and 390 crawlers.
 - RB
 - SNB
 - TCR
-
-

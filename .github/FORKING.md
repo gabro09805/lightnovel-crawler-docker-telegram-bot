@@ -8,14 +8,14 @@ All workflows are designed to provide full validation on forks, following the pr
 
 ### What Runs on Forks
 
-| Capability | Main Repo | Forks |
-|------------|-----------|-------|
-| Lint/validation | Yes | Yes |
-| Build executables | Yes | Yes |
-| Download artifacts | Yes | Yes |
-| GitHub Releases | Yes | No |
-| Docker push | Yes (lncrawl namespace) | Yes (fork namespace) |
-| PyPI publish | Yes | No |
+| Capability         | Main Repo               | Forks                |
+| ------------------ | ----------------------- | -------------------- |
+| Lint/validation    | Yes                     | Yes                  |
+| Build executables  | Yes                     | Yes                  |
+| Download artifacts | Yes                     | Yes                  |
+| GitHub Releases    | Yes                     | No                   |
+| Docker push        | Yes (lncrawl namespace) | Yes (fork namespace) |
+| PyPI publish       | Yes                     | No                   |
 
 ## Workflows Overview
 
@@ -23,10 +23,10 @@ All workflows are designed to provide full validation on forks, following the pr
 
 These workflows run automatically on pushes and pull requests:
 
-| Workflow | File | Description |
-|----------|------|-------------|
-| Lint & Test (Python) | `lint-py.yml` | Runs flake8, builds wheel, tests installation |
-| Lint & Test (Web) | `lint-web.yml` | Runs eslint, builds frontend |
+| Workflow             | File           | Description                                   |
+| -------------------- | -------------- | --------------------------------------------- |
+| Lint & Test (Python) | `lint-py.yml`  | Runs flake8, builds wheel, tests installation |
+| Lint & Test (Web)    | `lint-web.yml` | Runs eslint, builds frontend                  |
 
 ### Build and Publish (`release.yml`)
 
@@ -38,6 +38,7 @@ Triggered by version tags (`v*`). On forks, this workflow:
 4. **Builds and pushes Docker image** to your fork's GHCR namespace
 
 The following steps only run on the main repository:
+
 - GitHub Release creation
 - PyPI package publishing
 - Short link updates (SHLINK)
@@ -126,6 +127,7 @@ git push origin :v0.0.0-test
 ### Build Fails on ARM64
 
 ARM64 builds use QEMU emulation and may take longer. If builds timeout:
+
 1. The base image must be built for ARM64 first
 2. Calibre installation on ARM64 may have different dependencies
 

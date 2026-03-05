@@ -5,23 +5,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build & Development Commands
 
 ```bash
-# Setup virtual environment with uv (creates .venv)
-make setup
-
-# Install Python and web dependencies
-make install       # Both Python and web
-make install-py    # Python only
-make install-web   # Web frontend only
+# Setup virtual environment and Install Python dependencies
+make install
 
 # Run development servers
-make start         # Both backend (with watch) and frontend
-make start-server  # Backend server only
-make watch-server  # Backend with auto-reload
-make start-web     # Frontend dev server (Vite)
+make start         # Backend server only
+make watch         # Backend with auto-reload
 
 # Build
 make build         # Full build (web + wheel + exe)
-make build-web     # Frontend build only
 make build-wheel   # Python wheel only
 make build-exe     # PyInstaller executable
 
@@ -36,8 +28,14 @@ make add-dev black          # Add dev dependency
 make rm-dep httpx           # Remove runtime dependency
 make rm-dev black           # Remove dev dependency
 
+# Docker Commands
+make docker-build       # Build application Docker image
+make docker-up          # Start containers in background
+make docker-down        # Stop containers
+make docker-logs
+
 # Run from source directly
-uv run lncrawl
+uv run python -m lncrawl
 ```
 
 ## Architecture Overview
@@ -88,26 +86,40 @@ uv run lncrawl
 
 ### Services (via AppContext)
 
-Key services available on `ctx`: `config`, `db`, `http`, `sources`, `crawler`, `binder`, `jobs`, `novels`, `chapters`, `volumes`
+`lncrawl` is structured around a set of **services**, each responsible for a major piece of application functionality. All core services are accessed via the singleton `AppContext` (usually as `ctx` in code). This allows shared, on-demand initialization and simple dependency management throughout the app.
 
-### Web Frontend
+**Key services available from the app context:**
 
-**Location**: `lncrawl-web/`
+- **config**: Configuration manager (loads and saves user settings, environment variables, CLI flags)
+- **db**: Database access (SQLModel, manages library, jobs, novels, chapters)
+- **http**: HTTP client (handles web requests, session, caching, retries, Cloudflare support)
+- **sources**: Source crawler registry/discovery (loads all available crawlers, search/index)
+- **crawler**: The currently selected/active crawler instance (handles all scraping logic for a selected source)
+- **binder**: Output/binding manager (handles EPUB generation, invoking Calibre for conversions, text export)
+- **jobs**: Background job/task queue (for crawling, downloads, conversions)
+- **novels**: Novel library management (add/remove novels, metadata)
+- **chapters**: Chapters manager (fetch/save chapter data)
+- **volumes**: Volumes manager (volume/chapter grouping, manipulation)
 
-- React 19 with TypeScript, Vite, Ant Design
-- Redux Toolkit for state management
-- SCSS for styling
+All services are **lazily loaded** as properties of the context to optimize performance and resource use.
+
+For command-line tools, FastAPI server endpoints, and crawlers, you should always access shared services via `ctx` for consistency and compatibility.
 
 ## Creating a New Source Crawler
 
-1. Create file in appropriate `sources/{lang}/` directory
-2. Extend `Crawler` class from `lncrawl.core.crawler`
-3. Set `base_url` class attribute (list of URL patterns)
-4. Implement `read_novel_info()` to populate `self.novel` with title, cover, volumes, chapters
-5. Implement `download_chapter_body(chapter)` returning HTML content
-6. Optional: `search_novel(query)` returning list of `SearchResult`
+**Full guide:** [.github/docs/CREATING_CRAWLERS.md](.github/docs/CREATING_CRAWLERS.md)
 
-## Code Style
+**Recommended:** Copy **`sources/_examples/_01_general_soup.py`** and use **`GeneralSoupTemplate`** (`lncrawl.templates.soup.general`). Implement:
 
-- Python: flake8 with max-line-length 150, black formatting with line-length 120
-- Web: ESLint with TypeScript rules
+- **Required:** `parse_title(soup)`, `parse_cover(soup)`, `parse_chapter_list(soup)` (yield `Chapter`/`Volume`), `select_chapter_body(soup)` (return the chapter text Tag).
+- **Optional:** `parse_authors(soup)`, `parse_summary(soup)`, `get_novel_soup()`, `initialize()`, `login()`.
+
+For search use `_02_searchable_soup.py` (SearchableSoupTemplate)
+
+For volumes use `_05_with_volume_soup.py` or `_07_optional_volume_soup.py`
+
+For JS-heavy sites use browser examples (`_09`–`_17`).
+
+Alternative: base **`Crawler`** with `read_novel_info()` and `download_chapter_body()` via `_00_basic.py`.
+
+Test: `uv run python -m lncrawl -s "URL" --first 3 -f` and `uv run python -m lncrawl sources list | grep mysite`.

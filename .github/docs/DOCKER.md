@@ -32,33 +32,44 @@ docker run -it --rm \
 Run the web server with docker compose:
 
 ```bash
-# Using the local compose file
-docker compose -f scripts/local-compose.yml up -d
-
-# Or using make
+# Using make (recommended)
 make docker-up
+
+# Or directly
+docker compose -f scripts/local-compose.yml up -d
 ```
 
-The server will be available at `http://localhost:23457`
+The server will be available at `http://localhost:23457`. To view logs: `make docker-logs`. To stop: `make docker-down`.
 
 ### Server Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `LNCRAWL_DATA_PATH` | Data storage path | `/data` |
-| `DATABASE_URL` | PostgreSQL connection string | SQLite |
-| `PYTHONUNBUFFERED` | Unbuffered Python output | `1` |
+| Variable            | Description                  | Default |
+| ------------------- | ---------------------------- | ------- |
+| `LNCRAWL_DATA_PATH` | Data storage path            | `/data` |
+| `DATABASE_URL`      | PostgreSQL connection string | SQLite  |
+| `PYTHONUNBUFFERED`  | Unbuffered Python output     | `1`     |
 
 ## Building Locally
 
 ### Build Application Image
 
 ```bash
-# Using make
+# Using make (builds base image first, then app)
 make docker-build
 
-# Or directly with docker
+# Or directly (requires an existing base image)
 docker build -t lncrawl .
+```
+
+### Build Base Image
+
+The base image includes Calibre and system dependencies. Required before `make docker-build` if you don't pull it:
+
+```bash
+make docker-base
+
+# Or directly
+docker build -t lncrawl-base -f Dockerfile.base .
 ```
 
 ### Build with Custom Base Image
@@ -67,14 +78,6 @@ If you've built a custom base image:
 
 ```bash
 docker build --build-arg BASE_IMAGE=ghcr.io/myuser/lncrawl-base -t lncrawl .
-```
-
-### Build Base Image
-
-The base image includes Calibre and system dependencies:
-
-```bash
-docker build -f Dockerfile.base -t lncrawl-base .
 ```
 
 ## Multi-Architecture Support
@@ -95,6 +98,7 @@ Basic setup for local development with PostgreSQL.
 ### Server Deployment (`scripts/server-compose.yml`)
 
 Production setup with:
+
 - PostgreSQL with resource limits
 - Server mode with auto-restart
 - Volume persistence
@@ -133,6 +137,7 @@ docker run -it --rm \
 ### Container Won't Start
 
 Check logs:
+
 ```bash
 docker logs <container_id>
 ```
@@ -140,6 +145,7 @@ docker logs <container_id>
 ### Permission Issues
 
 The container runs as root by default. For volume mounts, ensure proper permissions:
+
 ```bash
 sudo chown -R 1000:1000 ./downloads
 ```
@@ -151,14 +157,25 @@ Calibre requires GUI libraries. The base image includes these, but headless oper
 ### ARM64 Build Issues
 
 ARM64 builds use QEMU emulation in CI and may take longer. If local builds fail:
+
 1. Ensure Docker buildx is configured
 2. Ensure QEMU is installed for cross-platform builds
 
+## Makefile Targets
+
+| Target              | Description                       |
+| ------------------- | --------------------------------- |
+| `make docker-base`  | Build base image (Calibre + deps) |
+| `make docker-build` | Build base then application image |
+| `make docker-up`    | Start server stack (compose)      |
+| `make docker-down`  | Stop server stack                 |
+| `make docker-logs`  | Stream compose logs               |
+
 ## Image Tags
 
-| Tag | Description |
-|-----|-------------|
-| `latest` | Latest stable release |
-| `v4.x.x` | Specific version |
+| Tag      | Description             |
+| -------- | ----------------------- |
+| `latest` | Latest stable release   |
+| `v4.x.x` | Specific version        |
 | `server` | Server deployment image |
-| `<sha>` | Specific commit |
+| `<sha>`  | Specific commit         |
