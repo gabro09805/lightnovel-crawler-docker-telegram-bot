@@ -1,0 +1,25 @@
+name: Update Submodules
+
+on:
+  repository_dispatch:
+    types: [web-build-updated]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: dev
+          submodules: recursive
+
+      - name: Update submodules
+        run: git submodule update --remote --merge
+
+      - name: Commit and Push
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          branch: dev
+          commit_message: Update submodules (lncrawl/server/web)

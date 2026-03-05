@@ -17,6 +17,7 @@ else
 endif
 
 setup:
+	git submodule update --remote --merge
 ifeq ($(OS),Windows_NT)
 	@where uv >nul 2>nul || powershell -NoProfile -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 else
@@ -61,6 +62,7 @@ rm-dev: setup
 
 pull:
 	git pull --rebase --autostash
+	git submodule update --remote --merge
 
 remove-tag:
 	git push --delete origin "v$(VERSION)"

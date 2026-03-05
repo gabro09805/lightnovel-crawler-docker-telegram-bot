@@ -1,0 +1,4 @@
+[submodule "lncrawl/server/web"]
+	path = lncrawl/server/web
+	url = https://github.com/lncrawl/lncrawl-web
+	branch = artifacts
