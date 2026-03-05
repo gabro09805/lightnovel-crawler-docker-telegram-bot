@@ -2972,12 +2972,4 @@ We are supporting 460 sources and 390 crawlers.
 - SNB
 - TCR
 
-## Sponsors
 
-<table>
-  <tbody>
-    <tr align="center">
-      <td align="center"><a href="https://wuxiaworld.eu"><img src="https://www.wuxiaworld.eu/apple-touch-icon.png" width="200px;" alt=""/><br /><sub><h3>Wuxiaworld</b></sub></a></td>
-    </tr>
-  </tbody>
-</table>
