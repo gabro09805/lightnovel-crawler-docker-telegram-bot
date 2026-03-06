@@ -162,9 +162,8 @@ jobs:
           SHLINK_API_KEY: ${{ secrets.SHLINK_API_KEY }}
         run: sh ./scripts/bitanon.sh
 
-      - name: 📦 Publish to PyPI
+      - name: 📤 PyPI Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
         env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-          TWINE_NON_INTERACTIVE: true
-        run: sh ./scripts/publish.sh
+          print-hash: true
+          password: ${{ secrets.PYPI_API_TOKEN }}
