@@ -1,4 +1,4 @@
-name: Lint & Test (Python)
+name: Lint & Test
 run-name: "Python CI${{ github.event_name == 'pull_request' && format(' - PR #{0}', github.event.pull_request.number) || format(' - {0}', github.ref_name) }}"
 
 on:
