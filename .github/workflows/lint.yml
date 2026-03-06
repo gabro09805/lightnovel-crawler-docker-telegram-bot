@@ -1,7 +1,8 @@
 name: Lint & Test
-run-name: "Python CI${{ github.event_name == 'pull_request' && format(' - PR #{0}', github.event.pull_request.number) || format(' - {0}', github.ref_name) }}"
 
 on:
+  workflow_call: {}
+  workflow_dispatch: {}
   push:
     branches:
       - master
@@ -12,7 +13,7 @@ on:
       - "pyproject.toml"
       - "uv.lock"
       - ".flake8"
-      - ".github/workflows/lint-py.yml"
+      - ".github/workflows/lint.yml"
   pull_request:
     branches:
       - dev
@@ -22,23 +23,22 @@ on:
       - "pyproject.toml"
       - "uv.lock"
       - ".flake8"
-      - ".github/workflows/lint-py.yml"
+      - ".github/workflows/lint.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  lncrawl:
+  validate:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    name: Python ${{ matrix.python-version }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
-
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+    name: Python ${{ matrix.python-version }}
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v6
@@ -59,14 +59,18 @@ jobs:
       - name: 📦 Install Dependencies
         run: uv sync --frozen --extra dev
 
-      - name: 🧹 Lint with flake8
+      - name: 🧹 Lint Code
         run: uv run flake8 -v --count --show-source --statistics
 
-      - name: 🏗️ Build Wheel Package
+      - name: 🏗️ Build Wheel
         run: uv run python -m build --wheel --no-isolation
 
-      - name: 🧪 Install lncrawl
+      - name: 🧪 Test Installation
         run: uv pip install --system dist/lightnovel_crawler*.whl
 
-      - name: 🧪 Run lncrawl
+      - name: 🧪 Check lncrawl
         run: lncrawl -ll sources list
+
+      - name: 🧪 Test Crawl
+        if: ${{ github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' }}
+        run: lncrawl -lll crawl 'https://novelfull.com/the-kings-avatar-for-the-glory.html' --first 2 --format epub --noin
