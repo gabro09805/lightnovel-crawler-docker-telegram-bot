@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
-      - name: Update submodules
+      - name: 🔄 Update submodules
         run: |
           git submodule sync
           git submodule update --init --remote --merge

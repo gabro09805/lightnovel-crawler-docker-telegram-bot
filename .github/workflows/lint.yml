@@ -73,4 +73,4 @@ jobs:
 
       - name: 🧪 Test Crawl
         if: ${{ github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' }}
-        run: lncrawl -lll crawl 'https://novelfull.com/the-kings-avatar-for-the-glory.html' --first 2 --format epub --noin
+        run: lncrawl -ll crawl 'https://novelfull.com/the-kings-avatar-for-the-glory.html' --first 2 --format epub --noin
