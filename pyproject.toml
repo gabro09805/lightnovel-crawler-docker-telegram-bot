@@ -33,7 +33,6 @@ dependencies = [
   "httpx[brotli,http2]>=0.24.0",
   "humanize>=4.0.0",
   "lxml>=5.4.0,<7.0.0",
-  "markdown>=3.4.0",
   "openai>=1.0.0",
   "passlib[argon2]>=1.7.4",
   "pillow>=8.0.0",
