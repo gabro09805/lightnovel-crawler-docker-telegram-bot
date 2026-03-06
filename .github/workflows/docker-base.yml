@@ -27,13 +27,16 @@ jobs:
 
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: recursive
 
       - name: 🔧 Set lowercase image name
         run: |
           echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/lncrawl-base" >> $GITHUB_ENV
 
-      - name: 🏗️ Set up QEMU
+      - name: 🤖 Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: 🐳 Set up Docker Buildx

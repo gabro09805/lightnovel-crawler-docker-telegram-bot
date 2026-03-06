@@ -37,7 +37,7 @@ jobs:
           echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
           echo "BASE_IMAGE=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/lncrawl-base:latest" >> $GITHUB_ENV
 
-      - name: 🏗️ Set up QEMU
+      - name: 🤖 Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: 🐳 Set up Docker Buildx
