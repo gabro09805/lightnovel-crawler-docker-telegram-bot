@@ -43,7 +43,7 @@ services:
           memory: 2G
 
   server:
-    image: ghcr.io/lncrawl/lightnovel-crawler:server
+    image: ghcr.io/lncrawl/lightnovel-crawler:latest
     ports:
       - "23457:8080"
     command: -ll server
