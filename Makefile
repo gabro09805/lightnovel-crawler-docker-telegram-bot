@@ -1,5 +1,5 @@
 .PHONY: all version clean setup install add-dep add-dev rm-dep rm-dev build-wheel build-exe build start watch lint pull remove-tag push-tag push-tag-force docker-build docker-up docker-down docker-logs
-all: version
+all: version install
 
 VERSION := $(strip $(file < lncrawl/VERSION))
 
@@ -11,7 +11,7 @@ UV := $(shell command -v uv 2>/dev/null || echo "$(HOME)/.local/bin/uv")
 endif
 
 version:
-	@echo Current version: $(VERSION)
+	@echo Lightnovel Crawler: $(VERSION)
 
 clean:
 ifeq ($(OS),Windows_NT)

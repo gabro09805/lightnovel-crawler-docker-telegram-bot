@@ -22,10 +22,8 @@ logger = logging.getLogger(__name__)
 # Define typer
 app = typer.Typer(
     context_settings={
-        # "auto_envvar_prefix": 'LNC',
         "help_option_names": ["-h", "--help"],
     },
-    no_args_is_help=True,
     pretty_exceptions_short=True,
     pretty_exceptions_enable=True,
     pretty_exceptions_show_locals=False,
@@ -42,7 +40,7 @@ app.add_typer(server)
 
 
 # Define main command
-@app.callback()
+@app.callback(invoke_without_command=True)
 def main(
     context: typer.Context,
     log_level: Annotated[
@@ -77,3 +75,8 @@ def main(
     if config:
         os.environ['LNCRAWL_CONFIG'] = str(config)
     ctx.config.load()
+
+    # start server if no subcommand is invoked
+    if not context.invoked_subcommand:
+        from .commands.server import server as start_server
+        start_server(host='127.0.0.1', port=8080)
