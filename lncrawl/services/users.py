@@ -106,6 +106,8 @@ class UserService:
         offset: int = 0,
         limit: int = 20,
         search: Optional[str] = None,
+        is_verified: Optional[bool] = None,
+        is_active: Optional[bool] = None,
         referrer: Optional[str] = None,
     ) -> Paginated[User]:
         with ctx.db.session() as sess:
@@ -124,9 +126,12 @@ class UserService:
                         sa.cast(User.tier, sa.String).ilike(q),
                     )
                 )
-
             if referrer:
                 conditions.append(User.referrer_id == referrer)
+            if is_verified is not None:
+                conditions.append(sa.col(User.is_verified).is_(is_verified))
+            if is_active is not None:
+                conditions.append(sa.col(User.is_active).is_(is_active))
 
             if conditions:
                 cnt = cnt.where(*conditions)

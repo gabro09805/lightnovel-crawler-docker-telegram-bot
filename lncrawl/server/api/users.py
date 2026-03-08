@@ -18,12 +18,16 @@ def list_users(
     offset: int = Query(default=0),
     limit: int = Query(default=20, le=100),
     referrer: Optional[str] = Query(None),
+    is_verified: Optional[bool] = Query(None),
+    is_active: Optional[bool] = Query(None),
 ) -> Paginated[User]:
     return ctx.users.list(
         offset,
         limit,
         search=search,
         referrer=referrer,
+        is_verified=is_verified,
+        is_active=is_active,
     )
 
 
