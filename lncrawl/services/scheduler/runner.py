@@ -189,6 +189,9 @@ class JobRunner:
             self.job.extra = extra
 
     def __send_mail(self):
+        if not self.user.is_verified:
+            return
+
         if self.job.parent_job_id:
             parent = ctx.jobs.get_root(self.job.id)
             if not parent:
@@ -196,9 +199,6 @@ class JobRunner:
             runner = JobRunner(parent, self.signal)
             runner.user = self.user
             return runner.__send_mail()
-
-        if not ctx.users.is_verified(self.user.email):
-            return
 
         alert_items: Set[NotificationItem] = set()
         all_notifications = set(NotificationItem)

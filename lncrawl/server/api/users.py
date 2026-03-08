@@ -44,14 +44,6 @@ def get_user(
     return ctx.users.get(user_id)
 
 
-@router.get("/{user_id}/verified", summary="Get the verified status of the user")
-def get_verified_status(
-    user_id: str = Path(),
-) -> bool:
-    email = ctx.users.get_user_email(user_id)
-    return ctx.users.is_verified(email)
-
-
 @router.put("/{user_id}", summary="Update the user")
 def update_user(
     user: User = Security(ensure_user),

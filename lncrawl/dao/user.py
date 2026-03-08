@@ -3,7 +3,6 @@ from typing import Optional
 import sqlmodel as sa
 
 from ..utils.crypto_tools import generate_token
-from ..utils.time_utils import current_timestamp
 from ._base import BaseTable
 from .enums import UserRole, UserTier
 
@@ -43,16 +42,9 @@ class User(BaseTable, table=True):
         default=True,
         description="Active status"
     )
-
-
-class VerifiedEmail(sa.SQLModel, table=True):
-    email: str = sa.Field(
-        primary_key=True,
-        description="User Email"
-    )
-    created_at: int = sa.Field(
-        sa_type=sa.BigInteger,
-        default_factory=current_timestamp
+    is_verified: bool = sa.Field(
+        default=False,
+        description="Email verification status"
     )
 
 

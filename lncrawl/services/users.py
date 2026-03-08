@@ -9,8 +9,7 @@ from passlib.context import CryptContext
 from sqlalchemy.exc import IntegrityError
 
 from ..context import ctx
-from ..dao import (NotificationItem, User, UserRole, UserTier, UserToken,
-                   VerifiedEmail)
+from ..dao import NotificationItem, User, UserRole, UserTier, UserToken
 from ..exceptions import ServerErrors
 from ..server.models import (CreateRequest, LoginRequest, Paginated,
                              PasswordUpdateRequest, SignupRequest,
@@ -234,31 +233,17 @@ class UserService:
                 sess.delete(user)
                 sess.commit()
 
-    def is_verified(self, email: str) -> bool:
-        with ctx.db.session() as sess:
-            verified = sess.get(VerifiedEmail, email)
-            return bool(verified)
-
-    def get_user_email(self, user_id: str) -> str:
-        with ctx.db.session() as sess:
-            email = sess.scalar(sa.select(User.email).where(User.id == user_id))
-            if not email:
-                raise ServerErrors.no_such_user
-            return email
-
     def set_verified(self, email: str) -> None:
-        if self.is_verified(email):
-            return
-
         with ctx.db.session() as sess:
             user = sess.exec(
                 sa.select(User).where(User.email == email)
             ).first()
             if not user:
                 raise ServerErrors.no_such_user
+            if user.is_verified:
+                return
 
-            row = VerifiedEmail(email=email)
-            sess.add(row)
+            user.is_verified = True
 
             if 'email_alerts' not in user.extra:
                 extra = dict(user.extra)
@@ -272,8 +257,10 @@ class UserService:
 
     def send_otp(self, email: str) -> str:
         with ctx.db.session() as sess:
-            verified = sess.get(VerifiedEmail, email)
-            if verified:
+            user = sess.exec(
+                sa.select(User).where(User.email == email).limit(1)
+            ).first()
+            if user and user.is_verified:
                 raise ServerErrors.email_already_verified
 
         otp = str(secrets.randbelow(1000000)).zfill(6)
@@ -294,10 +281,7 @@ class UserService:
         if not self._check(input_otp, hashed_otp):
             raise ServerErrors.wrong_otp
 
-        with ctx.db.session() as sess:
-            row = VerifiedEmail(email=email)
-            sess.add(row)
-            sess.commit()
+        self.set_verified(email)
 
     def send_password_reset_link(self, email: str) -> None:
         with ctx.db.session() as sess:

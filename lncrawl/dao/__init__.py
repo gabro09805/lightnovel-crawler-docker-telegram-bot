@@ -14,12 +14,11 @@ from .novel import Novel
 from .read_history import ReadHistory
 from .secrets import Secret
 from .tag import Tag
-from .user import User, UserToken, VerifiedEmail
+from .user import User, UserToken
 from .volume import Volume
 
 models: List[Type[SQLModel]] = [
     User,
-    VerifiedEmail,
     UserToken,
     Tag,
     Library,

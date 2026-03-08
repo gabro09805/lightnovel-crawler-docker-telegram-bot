@@ -16,7 +16,6 @@ class TokenResponse(BaseModel):
 
 class LoginResponse(TokenResponse):
     user: User = Field(description="The user")
-    is_verified: bool = Field(description="Is the email verified")
 
 
 class SignupRequest(BaseModel):

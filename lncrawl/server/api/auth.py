@@ -23,11 +23,9 @@ def login(
 ) -> LoginResponse:
     user = ctx.users.verify(credentials)
     token = ctx.users.generate_token(user)
-    is_verified = ctx.users.is_verified(user.email)
     return LoginResponse(
         token=token,
         user=user,
-        is_verified=is_verified,
     )
 
 
@@ -40,11 +38,9 @@ def signup(
 ) -> LoginResponse:
     user = ctx.users.signup(body)
     token = ctx.users.generate_token(user)
-    is_verified = ctx.users.is_verified(user.email)
     return LoginResponse(
         token=token,
         user=user,
-        is_verified=is_verified,
     )
 
 
@@ -101,7 +97,7 @@ def send_otp(
     return TokenResponse(token=token)
 
 
-@router.post('/verify-otp', summary='Get if current user email is verified')
+@router.post('/verify-otp', summary='Verify OTP and set user as verified')
 def verify_otp(
     otp: str = Form(),
     token: str = Form(),
