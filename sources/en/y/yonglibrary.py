@@ -15,14 +15,15 @@ class YongLibraryCrawler(GeneralBrowserTemplate):
     ]
 
     def initialize(self) -> None:
-        self.cleaner.bad_css.update(
-            [
-                ".ad-slot",
-                ".chapter-companion",
-                ".chapter-content__badge",
-                "script",
-            ]
-        )
+        self.cleaner.bad_css.update([
+            ".ad-slot",
+            ".chapter-companion",
+            ".chapter-content__badge",
+            "script",
+        ])
+        self.cleaner.bad_text_regex.update([
+            r'window.pubfuturetag = .*})',
+        ])
 
     def search_novel(self, query: str) -> List[SearchResult]:
         url = f"{self.home_url}wp-json/wp/v2/search"
