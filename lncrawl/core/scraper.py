@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, MutableMapping, Optional, Tuple, Union
 from urllib.parse import ParseResult, urlparse
 
 from bs4 import BeautifulSoup
+from cloudscraper import create_scraper
 from PIL import Image, UnidentifiedImageError
 from requests import Response, Session
 from requests.exceptions import ProxyError
@@ -14,7 +15,6 @@ from requests.structures import CaseInsensitiveDict
 from tenacity import (RetryCallState, retry, retry_if_exception_type,
                       stop_after_attempt, wait_random_exponential)
 
-from ..cloudscraper import create_scraper
 from ..exceptions import RetryErrorGroup
 from .proxy import get_a_proxy, remove_faulty_proxies
 from .soup import SoupMaker
