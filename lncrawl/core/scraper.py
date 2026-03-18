@@ -9,13 +9,11 @@ from urllib.parse import ParseResult, urlparse
 from bs4 import BeautifulSoup
 from cloudscraper import create_scraper
 from PIL import Image, UnidentifiedImageError
-from requests import Response, Session
+from requests import Response
 from requests.exceptions import ProxyError
 from requests.structures import CaseInsensitiveDict
-from tenacity import (RetryCallState, retry, retry_if_exception_type,
-                      stop_after_attempt, wait_random_exponential)
 
-from ..exceptions import RetryErrorGroup
+from ..context import ctx
 from .proxy import get_a_proxy, remove_faulty_proxies
 from .soup import SoupMaker
 from .taskman import TaskManager
@@ -57,9 +55,6 @@ class Scraper(TaskManager, SoupMaker):
         self.last_soup_url = ""
         self.use_proxy = os.getenv("use_proxy")
 
-        self.init_parser(parser)
-        self.init_scraper()
-
     def close(self) -> None:
         if hasattr(self, "scraper"):
             self.scraper.close()
@@ -70,11 +65,13 @@ class Scraper(TaskManager, SoupMaker):
         self.make_tag = self._soup_tool.make_tag  # type:ignore
         self.make_soup = self._soup_tool.make_soup  # type:ignore
 
-    def init_scraper(self, session: Optional[Session] = None):
+    def init_scraper(self):
         """Check for option: https://github.com/VeNoMouS/cloudscraper"""
+        if hasattr(self, "scraper"):
+            self.scraper.close()
         # OPTIMAL CONFIGURATION for preventing your specific 403 issues
         self.scraper = create_scraper(
-            # debug=True,  # Enable for monitoring (disable in production)
+            debug=ctx.logger.is_debug,     # Enable for monitoring (disable in production)
 
             # KEY SETTINGS to prevent 403 errors
             min_request_interval=2.0,      # CRITICAL: Prevents TLS blocking
@@ -83,7 +80,7 @@ class Scraper(TaskManager, SoupMaker):
 
             # Enhanced protection
             auto_refresh_on_403=False,     # Auto-recover from 403 errors
-            max_403_retries=0,             # Max retry attempts
+            max_403_retries=2,             # Max retry attempts
             session_refresh_interval=900,  # Session refresh time in seconds
 
             # Optimized stealth mode
@@ -98,7 +95,7 @@ class Scraper(TaskManager, SoupMaker):
 
             # User agent filtering
             browser={
-                'browser': 'chrome',
+                'browser': 'firefox',
                 'platform': 'windows',
                 'desktop': True,
                 'mobile': False,
@@ -119,7 +116,6 @@ class Scraper(TaskManager, SoupMaker):
         method: str,
         url: str,
         *args,
-        max_retries: Optional[int] = None,
         headers: Optional[MutableMapping] = {},
         **kwargs,
     ):
@@ -137,25 +133,11 @@ class Scraper(TaskManager, SoupMaker):
         headers.setdefault("Origin", self.home_url.strip("/"))
         headers.setdefault("Referer", self.last_soup_url or self.home_url)
 
-        def _after_retry(retry_state: RetryCallState):
-            future = retry_state.outcome
-            if future:
-                e = future.exception()
-                if isinstance(e, RetryErrorGroup):
-                    logger.debug(f"{repr(e)} | Retrying...")
-                    if isinstance(e, ProxyError):
-                        for proxy_url in kwargs.get("proxies", {}).values():
-                            remove_faulty_proxies(proxy_url)
-                        kwargs["proxies"] = self.__get_proxies(_parsed.scheme, 5)
-
-        @retry(
-            stop=stop_after_attempt(max_retries or 0),
-            wait=wait_random_exponential(multiplier=0.5, max=60),
-            retry=retry_if_exception_type(RetryErrorGroup),
-            after=_after_retry,
-            reraise=True,
+        logger.debug(
+            f"[{method.upper()}] {url}\n"
+            + "\n".join([f"    {k} = {v}" for k, v in kwargs.items()])
         )
-        def _do_request():
+        try:
             response = method_call(
                 url,
                 *args,
@@ -163,16 +145,19 @@ class Scraper(TaskManager, SoupMaker):
                 headers=headers,
             )
             response.raise_for_status()
+
+            self.cookies.update({
+                x.name: x.value
+                for x in response.cookies
+            })
+
             response.encoding = "utf8"
-
-            self.cookies.update({x.name: x.value for x in response.cookies})
             return response
-
-        logger.debug(
-            f"[{method.upper()}] {url}\n"
-            + "\n".join([f"    {k} = {v}" for k, v in kwargs.items()])
-        )
-        return _do_request()
+        except ProxyError:
+            for proxy_url in kwargs.get("proxies", {}).values():
+                remove_faulty_proxies(proxy_url)
+            kwargs["proxies"] = self.__get_proxies(_parsed.scheme, 5)
+            raise
 
     # ------------------------------------------------------------------------- #
     # Helpers
@@ -251,7 +236,6 @@ class Scraper(TaskManager, SoupMaker):
             "get",
             url,
             timeout=timeout,
-            max_retries=2,
             **kwargs,
         )
 
@@ -267,7 +251,6 @@ class Scraper(TaskManager, SoupMaker):
             "post",
             url,
             data=data,
-            max_retries=max_retries,
             **kwargs,
         )
 
@@ -324,7 +307,6 @@ class Scraper(TaskManager, SoupMaker):
                 url,
                 headers=headers,
                 timeout=timeout,
-                max_retries=2,
                 **kwargs,
             )
             content = response.content

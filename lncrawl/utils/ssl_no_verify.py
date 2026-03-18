@@ -28,14 +28,14 @@ def no_ssl_verification():
 
         return settings
 
-    requests.Session.merge_environment_settings = merge_environment_settings
+    requests.Session.merge_environment_settings = merge_environment_settings  # type: ignore
 
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", InsecureRequestWarning)
             yield
     finally:
-        requests.Session.merge_environment_settings = old_merge_environment_settings
+        requests.Session.merge_environment_settings = old_merge_environment_settings  # type: ignore
 
         for adapter in opened_adapters:
             try:

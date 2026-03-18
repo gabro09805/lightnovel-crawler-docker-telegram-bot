@@ -71,6 +71,9 @@ class Crawler(Scraper):
         # `url` - the link where to download the chapter
         self.chapters: List[Chapter] = []
 
+        self.init_parser(parser)
+        self.init_scraper()
+
     def close(self) -> None:
         # if hasattr(self, "volumes"):
         #     self.volumes.clear()
