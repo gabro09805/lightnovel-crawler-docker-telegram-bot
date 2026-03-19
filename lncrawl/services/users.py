@@ -48,6 +48,7 @@ class UserService:
                     name="Server Admin",
                     role=UserRole.ADMIN,
                     tier=UserTier.VIP,
+                    created_at=0,
                 )
                 sess.add(user)
             else:
