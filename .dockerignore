@@ -1,10 +1,12 @@
 __pycache__/
 .git/
+.github/
 _book
 _novel
 .discord_bot_output/
 .DS_Store
 .env
+.flake8
 .idea/
 .pyi/
 .telegram_bot_output/
@@ -12,8 +14,10 @@ _novel
 .vscode
 *.egg-info
 *.log
+*.md
 *.pyc
 *.pyo
+*.rst
 /.tox
 /lightnovel-crawler-*
 /logs
@@ -24,15 +28,19 @@ build
 bundle
 client_secrets.json
 dist
+Dockerfile*
 env
 geckodriver.log
+LICENSE
 Lightnovels/
+Makefile
 mycreds.txt
 node_modules
 package.json
 save_pid.txt
+scripts/
 Test Novel
 windows/
 yarn.lock
 config.cfg
-lncrawl-web/node_modules
+lncrawl-web/
